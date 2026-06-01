@@ -1,0 +1,1802 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="description" content="Boutique KOLA - Système intégré de gestion des ventes, commandes et inventaire">
+    <meta name="theme-color" content="#7C3AED">
+    <title>Boutique KOLA - Système Intégré</title>
+    
+    <!-- Bibliothèques externes -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* Palette de couleurs premium */
+            --primary: #7C3AED;
+            --primary-dark: #6D28D9;
+            --primary-light: #8B5CF6;
+            --primary-ultra-light: #EDE9FE;
+            --secondary: #F59E0B;
+            --secondary-dark: #D97706;
+            --secondary-light: #FBBF24;
+            --accent: #EC4899;
+            --accent-dark: #DB2777;
+            --whatsapp: #25D366;
+            --whatsapp-dark: #128C7E;
+            --danger: #EF4444;
+            --danger-dark: #DC2626;
+            --success: #10B981;
+            --success-dark: #059669;
+            --warning: #F59E0B;
+            --info: #3B82F6;
+            --cyan: #06B6D4;
+            
+            /* Couleurs de texte améliorées */
+            --text-primary: #1F2937;
+            --text-secondary: #4B5563;
+            --text-tertiary: #6B7280;
+            --text-light: #9CA3AF;
+            --text-white: #FFFFFF;
+            --text-white-secondary: rgba(255, 255, 255, 0.85);
+            --text-white-tertiary: rgba(255, 255, 255, 0.7);
+            
+            --gray-50: #F9FAFB;
+            --gray-100: #F3F4F6;
+            --gray-200: #E5E7EB;
+            --gray-300: #D1D5DB;
+            --gray-400: #9CA3AF;
+            --gray-500: #6B7280;
+            --gray-600: #4B5563;
+            --gray-700: #374151;
+            --gray-800: #1F2937;
+            --gray-900: #111827;
+            
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+            --shadow-glow: 0 0 20px rgba(124, 58, 237, 0.3);
+            
+            --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            --radius-sm: 0.5rem;
+            --radius-md: 0.75rem;
+            --radius-lg: 1rem;
+            --radius-xl: 1.5rem;
+            --radius-2xl: 2rem;
+            --radius-full: 9999px;
+            
+            --container-padding: clamp(0.75rem, 4vw, 2rem);
+            --card-padding: clamp(1rem, 3vw, 1.5rem);
+            --font-size-xs: clamp(0.75rem, 2vw, 0.875rem);
+            --font-size-sm: clamp(0.875rem, 2.5vw, 1rem);
+            --font-size-base: clamp(1rem, 3vw, 1.125rem);
+            --font-size-lg: clamp(1.125rem, 3.5vw, 1.25rem);
+            --font-size-xl: clamp(1.25rem, 4vw, 1.5rem);
+            --font-size-2xl: clamp(1.5rem, 5vw, 1.875rem);
+            --font-size-3xl: clamp(1.875rem, 6vw, 2.25rem);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--gray-50) 0%, #ffffff 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* ===== AUTHENTIFICATION ===== */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: var(--container-padding);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .auth-box {
+            background: white;
+            padding: clamp(1.5rem, 5vw, 2.5rem) clamp(1.25rem, 4vw, 2rem);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-xl);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .auth-logo {
+            width: clamp(60px, 15vw, 80px);
+            height: clamp(60px, 15vw, 80px);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: clamp(28px, 7vw, 40px);
+            color: white;
+            box-shadow: var(--shadow-glow);
+        }
+
+        .auth-title {
+            font-size: var(--font-size-2xl);
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 20px;
+        }
+
+        .auth-error {
+            color: var(--danger);
+            margin-top: 15px;
+            font-size: var(--font-size-xs);
+        }
+
+        .auth-info {
+            margin-top: 15px;
+            font-size: var(--font-size-xs);
+            color: var(--text-secondary);
+            text-align: left;
+            background: var(--gray-100);
+            padding: 12px;
+            border-radius: var(--radius-md);
+        }
+
+        .auth-info p {
+            margin: 5px 0;
+            color: var(--text-secondary);
+        }
+
+        .auth-info strong {
+            color: var(--text-primary);
+        }
+
+        /* ===== CONTENEUR PRINCIPAL ===== */
+        .app-container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: var(--container-padding);
+            width: 100%;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: var(--radius-xl);
+            padding: clamp(1rem, 3vw, 1.5rem);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.75rem, 3vw, 1rem);
+            position: relative;
+            z-index: 1;
+        }
+
+        .logo {
+            width: clamp(45px, 10vw, 55px);
+            height: clamp(45px, 10vw, 55px);
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: clamp(22px, 5vw, 28px);
+            font-weight: bold;
+            color: var(--text-white);
+            box-shadow: var(--shadow-md);
+            transition: var(--transition-base);
+        }
+
+        .logo:hover {
+            transform: rotate(10deg) scale(1.05);
+        }
+
+        .brand h1 {
+            color: var(--text-white);
+            font-size: clamp(1.125rem, 4vw, 1.375rem);
+            margin-bottom: 4px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .brand p {
+            color: var(--text-white-secondary);
+            font-size: var(--font-size-xs);
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-info {
+            background: rgba(255,255,255,0.2);
+            padding: 6px 12px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            backdrop-filter: blur(10px);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            color: var(--text-white);
+        }
+
+        .user-role {
+            font-size: 9px;
+            opacity: 0.8;
+            color: var(--text-white-tertiary);
+        }
+
+        .btn-logout {
+            background: rgba(255,255,255,0.2);
+            color: var(--text-white);
+            border: none;
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: var(--transition-base);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: var(--font-size-xs);
+            backdrop-filter: blur(10px);
+        }
+
+        /* ===== NAVIGATION PAR ONGLETS ===== */
+        .main-tabs {
+            display: flex;
+            gap: 8px;
+            background: var(--gray-200);
+            padding: 8px;
+            border-radius: var(--radius-xl);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            flex-wrap: wrap;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+        }
+
+        .main-tab {
+            flex: 1;
+            min-width: 100px;
+            padding: clamp(10px, 2.5vw, 12px) clamp(12px, 3vw, 16px);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: var(--transition-base);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+
+        .main-tab:hover:not(.disabled) {
+            background: rgba(124, 58, 237, 0.1);
+            color: var(--primary);
+        }
+
+        .main-tab.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--text-white);
+            box-shadow: var(--shadow-md);
+        }
+
+        .main-tab.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            color: var(--text-tertiary);
+        }
+
+        .main-tab.disabled::after {
+            content: '🔒';
+            margin-left: 5px;
+            font-size: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .main-tabs {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                justify-content: flex-start;
+            }
+        }
+
+        /* ===== CONTENU DES ONGLETS ===== */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Overlay de verrouillage */
+        .tab-locked-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: var(--container-padding);
+        }
+
+        .lock-message {
+            background: white;
+            padding: clamp(1.5rem, 5vw, 2.5rem);
+            border-radius: var(--radius-2xl);
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            animation: bounceIn 0.5s ease;
+        }
+
+        @keyframes bounceIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            80% { transform: scale(1.02); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .lock-message i {
+            font-size: clamp(40px, 12vw, 60px);
+            color: var(--danger);
+            margin-bottom: 15px;
+        }
+
+        .lock-message h3 {
+            font-size: var(--font-size-xl);
+            margin-bottom: 10px;
+            color: var(--text-primary);
+        }
+
+        .lock-message p {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .lock-message .btn {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--text-white);
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* ===== DASHBOARD ===== */
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+            gap: clamp(0.75rem, 2vw, 1rem);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: var(--card-padding);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            text-align: center;
+            transition: var(--transition-base);
+            border: 1px solid var(--gray-200);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .dashboard-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+
+        .dashboard-card h3 {
+            font-size: var(--font-size-xs);
+            color: var(--text-tertiary);
+            margin-bottom: 8px;
+        }
+
+        .dashboard-card .value {
+            font-size: var(--font-size-xl);
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== PANELS ===== */
+        .panel {
+            background: white;
+            border-radius: var(--radius-xl);
+            padding: var(--card-padding);
+            margin-bottom: clamp(1rem, 3vw, 1.5rem);
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--gray-200);
+        }
+
+        .panel-title {
+            font-size: var(--font-size-lg);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-dark);
+            flex-wrap: wrap;
+        }
+
+        /* ===== FORMULAIRES ===== */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: clamp(10px, 2.5vw, 12px);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: var(--font-size-sm);
+            transition: var(--transition-fast);
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            background: white;
+        }
+
+        input::placeholder, textarea::placeholder {
+            color: var(--text-light);
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+
+        /* ===== BOUTONS ===== */
+        .btn {
+            padding: clamp(10px, 2.5vw, 12px) clamp(16px, 4vw, 20px);
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-base);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: var(--font-size-sm);
+            color: var(--text-white);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-whatsapp {
+            background: var(--whatsapp);
+        }
+
+        .btn-whatsapp:hover {
+            background: var(--whatsapp-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success) 0%, var(--success-dark) 100%);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: var(--font-size-xs);
+        }
+
+        /* Groupe de boutons pour la gestion des données */
+        .data-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .data-actions .btn {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        /* ===== GRILLES ===== */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr));
+            gap: clamp(1rem, 3vw, 1.5rem);
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(min(140px, 100%), 1fr));
+            gap: clamp(0.75rem, 2vw, 1rem);
+            max-height: 500px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+
+        .qr-card {
+            background: var(--gray-100);
+            padding: clamp(10px, 2.5vw, 12px);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            position: relative;
+            transition: var(--transition-base);
+            border: 1px solid var(--gray-200);
+        }
+
+        .qr-card p {
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+        }
+
+        .qr-card p:first-of-type {
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .sold-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: var(--text-white);
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 9px;
+            font-weight: bold;
+        }
+
+        /* ===== SCANNER ===== */
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            background: #000;
+        }
+
+        #video {
+            width: 100%;
+            height: auto;
+            min-height: 280px;
+            max-height: 400px;
+            object-fit: cover;
+        }
+
+        #scan-region {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 160px;
+            border: 3px solid var(--primary);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.4);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { border-color: var(--primary); }
+            50% { border-color: var(--secondary); }
+        }
+
+        .scanner-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        /* ===== LISTE DES VENTES ===== */
+        .sale-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-200);
+            flex-wrap: wrap;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .sale-total {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid var(--gray-200);
+            font-size: var(--font-size-lg);
+            font-weight: bold;
+            text-align: right;
+            color: var(--primary);
+        }
+
+        /* ===== JOURNAL DES VENTES ===== */
+        .sales-journal {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .journal-entry {
+            padding: 12px;
+            background: var(--gray-100);
+            border-radius: var(--radius-md);
+            margin-bottom: 10px;
+            border-left: 3px solid var(--primary);
+            color: var(--text-secondary);
+        }
+
+        .journal-entry strong {
+            color: var(--primary);
+        }
+
+        /* ===== TABLEAUX ===== */
+        .table-responsive {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 500px;
+        }
+
+        th, td {
+            padding: clamp(8px, 2vw, 12px);
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+            font-size: var(--font-size-sm);
+        }
+
+        th {
+            background: linear-gradient(135deg, var(--primary-ultra-light) 0%, var(--gray-100) 100%);
+            font-weight: 600;
+            color: var(--primary-dark);
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        td strong {
+            color: var(--text-primary);
+        }
+
+        tr:hover td {
+            background: rgba(124, 58, 237, 0.05);
+        }
+
+        /* ===== GRAPHIQUES ===== */
+        .chart-container {
+            height: clamp(250px, 40vw, 300px);
+            position: relative;
+        }
+
+        /* ===== CATEGORIES ===== */
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .category-btn {
+            padding: 6px 12px;
+            background: var(--gray-200);
+            border: none;
+            border-radius: var(--radius-full);
+            cursor: pointer;
+            transition: var(--transition-fast);
+            font-size: var(--font-size-xs);
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .category-btn:hover {
+            background: var(--primary-ultra-light);
+            color: var(--primary);
+        }
+
+        .category-btn.active {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: var(--text-white);
+        }
+
+        /* ===== ALERTES ===== */
+        .alert {
+            padding: clamp(10px, 2.5vw, 12px);
+            border-radius: var(--radius-md);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: var(--font-size-sm);
+        }
+
+        .alert-success {
+            background: #D1FAE5;
+            color: #065F46;
+            border-left: 4px solid var(--success);
+        }
+
+        .alert-warning {
+            background: #FEF3C7;
+            color: #92400E;
+            border-left: 4px solid var(--warning);
+        }
+
+        .alert-danger {
+            background: #FEE2E2;
+            color: #991B1B;
+            border-left: 4px solid var(--danger);
+        }
+
+        .alert-info {
+            background: #DBEAFE;
+            color: #1E40AF;
+            border-left: 4px solid var(--info);
+        }
+
+        /* ===== NOTIFICATIONS ===== */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            left: 20px;
+            background: var(--gray-800);
+            color: var(--text-white);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-lg);
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .toast {
+                left: 16px;
+                right: 16px;
+                bottom: 16px;
+            }
+        }
+
+        /* ===== FOOTER ===== */
+        .app-footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding: 1rem;
+            font-size: var(--font-size-xs);
+            color: var(--text-tertiary);
+            border-top: 1px solid var(--gray-200);
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-section {
+                justify-content: center;
+            }
+            
+            .data-actions {
+                flex-direction: column;
+            }
+            
+            .data-actions .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 560px) {
+            .dashboard-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .scanner-controls {
+                flex-direction: column;
+            }
+            
+            .scanner-controls .btn {
+                width: 100%;
+            }
+        }
+
+        /* Mode sombre */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --gray-50: #18181B;
+                --gray-100: #27272A;
+                --gray-200: #3F3F46;
+                --gray-300: #52525B;
+                --gray-400: #71717A;
+                --gray-500: #A1A1AA;
+                --gray-600: #D4D4D8;
+                --gray-700: #E4E4E7;
+                --gray-800: #F4F4F5;
+                --gray-900: #FAFAFA;
+                --text-primary: #F9FAFB;
+                --text-secondary: #D1D5DB;
+                --text-tertiary: #9CA3AF;
+                --text-light: #6B7280;
+            }
+            
+            .panel, .dashboard-card, .auth-box, .qr-card {
+                background: var(--gray-800);
+                border-color: var(--gray-700);
+            }
+            
+            input, select, textarea {
+                background: var(--gray-700);
+                border-color: var(--gray-600);
+                color: var(--text-white);
+            }
+            
+            .journal-entry {
+                background: var(--gray-700);
+            }
+            
+            .category-btn {
+                background: var(--gray-700);
+                color: var(--gray-300);
+            }
+            
+            .auth-info {
+                background: var(--gray-700);
+                color: var(--gray-300);
+            }
+        }
+
+        /* Optimisations tactiles */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .main-tab, .category-btn {
+                cursor: default;
+            }
+            
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+
+        /* Réduction des animations */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Écran d'authentification -->
+    <div class="auth-container" id="auth-container">
+        <div class="auth-box">
+            <div class="auth-logo">
+                <i class="fas fa-store"></i>
+            </div>
+            <h2 class="auth-title">Boutique KOLA</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Identifiant</label>
+                    <input type="text" id="username" placeholder="admin / user" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Mot de passe</label>
+                    <input type="password" id="password" placeholder="Mot de passe" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+            <div id="auth-error" class="auth-error"></div>
+            <div class="auth-info">
+                <p><strong><i class="fas fa-info-circle"></i> Accès:</strong></p>
+                <p>👑 <strong>Administrateur:</strong> admin / admin123<br>→ Accès à tous les onglets</p>
+                <p>👤 <strong>Utilisateur:</strong> user / user1<br>→ Accès uniquement au Scanner</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application principale -->
+    <div class="app-container" id="app-container" style="display: none;">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-section">
+                <div class="logo">K</div>
+                <div class="brand">
+                    <h1>BOUTIQUE KOLA</h1>
+                    <p>Système intégré de gestion</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <div class="user-info" id="user-info">
+                    <i class="fas fa-user" id="user-icon"></i> <span id="username-display"></span>
+                    <span class="user-role" id="user-role"></span>
+                </div>
+                <button class="btn-logout" id="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </div>
+        </div>
+
+        <!-- Navigation principale -->
+        <div class="main-tabs">
+            <button class="main-tab disabled" data-tab="dashboard" data-protected="true" data-admin-only="true">
+                <i class="fas fa-tachometer-alt"></i> Tableau de bord
+            </button>
+            <button class="main-tab" data-tab="scan" data-protected="false" data-admin-only="false">
+                <i class="fas fa-qrcode"></i> Scanner
+            </button>
+            <button class="main-tab disabled" data-tab="products" data-protected="true" data-admin-only="true">
+                <i class="fas fa-boxes"></i> Produits
+            </button>
+            <button class="main-tab disabled" data-tab="orders" data-protected="true" data-admin-only="true">
+                <i class="fas fa-shopping-cart"></i> Commandes
+            </button>
+            <button class="main-tab disabled" data-tab="inventory" data-protected="true" data-admin-only="true">
+                <i class="fas fa-chart-line"></i> Inventaire
+            </button>
+            <button class="main-tab disabled" data-tab="contact" data-protected="true" data-admin-only="true">
+                <i class="fas fa-envelope"></i> Contact
+            </button>
+        </div>
+
+        <!-- Onglet Tableau de bord -->
+        <div class="tab-content" id="dashboard">
+            <div class="dashboard-cards">
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-money-bill-wave"></i> Chiffre d'affaires</h3>
+                    <div class="value" id="total-revenue">0 FCFA</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-shopping-cart"></i> Articles vendus</h3>
+                    <div class="value" id="total-sold">0</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-boxes"></i> Stock disponible</h3>
+                    <div class="value" id="total-stock">0</div>
+                </div>
+                <div class="dashboard-card">
+                    <h3><i class="fas fa-chart-pie"></i> Taux de vente</h3>
+                    <div class="value" id="sales-rate">0%</div>
+                </div>
+            </div>
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-chart-line"></i> Évolution des ventes</h3>
+                    <div class="chart-container"><canvas id="sales-chart"></canvas></div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-chart-pie"></i> Ventes par catégorie</h3>
+                    <div class="chart-container"><canvas id="category-chart"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title"><i class="fas fa-history"></i> Journal des ventes</h3>
+                <div class="sales-journal" id="sales-journal"><p>Aucune vente enregistrée</p></div>
+            </div>
+        </div>
+
+        <!-- Onglet Scanner -->
+        <div class="tab-content active" id="scan">
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-qrcode"></i> Scanner QR Code</h3>
+                    <div id="scanner-container">
+                        <video id="video" autoplay playsinline></video>
+                        <div id="scan-region"></div>
+                    </div>
+                    <div class="scanner-controls">
+                        <button id="start-scanner" class="btn btn-primary"><i class="fas fa-camera"></i> Démarrer</button>
+                        <button id="stop-scanner" class="btn btn-danger" style="display: none;"><i class="fas fa-stop"></i> Arrêter</button>
+                    </div>
+                    <div id="qr-result" class="alert alert-success" style="display: none;"></div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-receipt"></i> Vente en cours</h3>
+                    <div id="sale-items"><p>Aucun article scanné</p></div>
+                    <div class="sale-total" id="sale-total">Total: 0 FCFA</div>
+                    <button id="send-whatsapp" class="btn btn-whatsapp" style="width: 100%; margin-top: 15px;"><i class="fab fa-whatsapp"></i> Envoyer la vente</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Produits -->
+        <div class="tab-content" id="products">
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-plus-circle"></i> Ajouter un produit</h3>
+                    <div class="form-group"><label>Nom du produit</label><input type="text" id="product-name" placeholder="Ex: Téléphone XYZ"></div>
+                    <div class="form-group"><label>Prix (FCFA)</label><input type="number" id="product-price" placeholder="Ex: 45000"></div>
+                    <div class="form-group"><label>Quantité initiale</label><input type="number" id="product-quantity" value="1" min="1"></div>
+                    <div class="form-group"><label>Catégorie</label>
+                        <select id="product-category">
+                            <option value="électronique">📱 Électronique</option>
+                            <option value="vêtements">👕 Vêtements</option>
+                            <option value="alimentation">🍎 Alimentation</option>
+                            <option value="maison">🏠 Maison</option>
+                            <option value="sport">⚽ Sport</option>
+                            <option value="autre">📦 Autre</option>
+                        </select>
+                    </div>
+                    <button id="generate-qr" class="btn btn-primary" style="width: 100%;"><i class="fas fa-qrcode"></i> Générer le QR Code</button>
+                </div>
+
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-filter"></i> Filtres</h3>
+                    <div class="form-group"><label>Catégorie</label>
+                        <div class="categories" id="category-filters">
+                            <button class="category-btn active" data-category="all">Tous</button>
+                            <button class="category-btn" data-category="électronique">📱 Électronique</button>
+                            <button class="category-btn" data-category="vêtements">👕 Vêtements</button>
+                            <button class="category-btn" data-category="alimentation">🍎 Alimentation</button>
+                            <button class="category-btn" data-category="maison">🏠 Maison</button>
+                            <button class="category-btn" data-category="sport">⚽ Sport</button>
+                            <button class="category-btn" data-category="autre">📦 Autre</button>
+                        </div>
+                    </div>
+                    <button id="print-all" class="btn btn-secondary" style="width: 100%;"><i class="fas fa-print"></i> Imprimer tous les QR codes</button>
+                    
+                    <div class="data-actions">
+                        <button id="import-json" class="btn btn-primary"><i class="fas fa-file-import"></i> Importer JSON</button>
+                        <button id="export-json" class="btn btn-success"><i class="fas fa-file-export"></i> Exporter JSON</button>
+                        <button id="reset-data" class="btn btn-danger"><i class="fas fa-trash-alt"></i> Réinitialiser</button>
+                    </div>
+                    <input type="file" id="file-input" accept=".json" style="display: none;">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h3 class="panel-title"><i class="fas fa-qrcode"></i> QR Codes générés</h3>
+                <div id="qr-codes-container" class="qr-grid"><p>Aucun QR code généré</p></div>
+            </div>
+        </div>
+
+        <!-- Onglet Commandes -->
+        <div class="tab-content" id="orders">
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-shopping-cart"></i> Formulaire de commande</h3>
+                    <div class="form-group"><label>Nom complet</label><input type="text" id="order-name" placeholder="Votre nom"></div>
+                    <div class="form-group"><label>WhatsApp</label><input type="tel" id="order-whatsapp" placeholder="+228 XX XX XX XX"></div>
+                    <div class="form-group"><label>Région</label>
+                        <select id="order-region">
+                            <option value="">Sélectionnez</option>
+                            <option value="Maritime">🌊 Maritime</option>
+                            <option value="Plateaux">⛰️ Plateaux</option>
+                            <option value="Centrale">🌾 Centrale</option>
+                            <option value="Kara">🏞️ Kara</option>
+                            <option value="Savanes">🌵 Savanes</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Ville</label><input type="text" id="order-city" placeholder="Votre ville"></div>
+                    <div class="form-group"><label>Adresse détaillée</label><textarea id="order-address" rows="3" placeholder="Quartier, rue, numéro..."></textarea></div>
+                    <div class="form-group"><label>Articles souhaités</label><textarea id="order-items" rows="2" placeholder="Décrivez les articles"></textarea></div>
+                    <button id="send-order" class="btn btn-whatsapp" style="width: 100%;"><i class="fab fa-whatsapp"></i> Envoyer la commande</button>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-info-circle"></i> Comment ça marche ?</h3>
+                    <div class="alert alert-success"><i class="fas fa-check-circle"></i><div>Remplissez le formulaire et cliquez sur "Envoyer la commande"</div></div>
+                    <div class="alert alert-success"><i class="fas fa-check-circle"></i><div>Votre commande sera envoyée directement sur WhatsApp</div></div>
+                    <div class="alert alert-success"><i class="fas fa-check-circle"></i><div>Nous vous contacterons pour confirmer la disponibilité</div></div>
+                    <div class="alert alert-success"><i class="fas fa-check-circle"></i><div>Livraison sous 24-48h</div></div>
+                    <div class="alert alert-info"><i class="fas fa-shield-alt"></i><div>Paiement sécurisé par carte ESODI</div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Inventaire -->
+        <div class="tab-content" id="inventory">
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-chart-line"></i> Analyse des ventes</h3>
+                    <div class="chart-container"><canvas id="inventory-sales-chart"></canvas></div>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-boxes"></i> Stock par catégorie</h3>
+                    <div class="chart-container"><canvas id="stock-chart"></canvas></div>
+                </div>
+            </div>
+            <div class="panel">
+                <h3 class="panel-title"><i class="fas fa-trophy"></i> Classement des produits</h3>
+                <div class="table-responsive">
+                    <table id="top-products-table">
+                        <thead><tr><th>Produit</th><th>Catégorie</th><th>Vendus</th><th>Stock</th><th>Chiffre d'affaires</th></tr></thead>
+                        <tbody><tr><td colspan="5" style="text-align: center;">Aucune donnée</td></tr></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Onglet Contact -->
+        <div class="tab-content" id="contact">
+            <div class="grid-2">
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-address-card"></i> Nos coordonnées</h3>
+                    <p><i class="fas fa-store" style="color: var(--primary);"></i> <strong>Boutique KOLA</strong></p>
+                    <p><i class="fas fa-map-marker-alt" style="color: var(--secondary);"></i> Rue du Commerce, Lomé, Togo</p>
+                    <p><i class="fas fa-phone" style="color: var(--success);"></i> +228 92 87 16 05</p>
+                    <p><i class="fas fa-envelope" style="color: var(--info);"></i> jeanskodoc22@gmail.com</p>
+                    <hr>
+                    <p><i class="fas fa-clock" style="color: var(--warning);"></i> <strong>Horaires</strong></p>
+                    <p>📅 Lundi - Vendredi: 8h - 20h</p>
+                    <p>📅 Samedi: 9h - 20h</p>
+                    <p>📅 Dimanche: 9h - 16h</p>
+                </div>
+                <div class="panel">
+                    <h3 class="panel-title"><i class="fas fa-comments"></i> Nous contacter</h3>
+                    <a href="https://wa.me/22892871605" target="_blank" class="btn btn-whatsapp" style="width: 100%; margin-bottom: 10px;"><i class="fab fa-whatsapp"></i> WhatsApp</a>
+                    <a href="tel:+22892871605" class="btn btn-primary" style="width: 100%; margin-bottom: 10px;"><i class="fas fa-phone"></i> Appeler</a>
+                    <div class="alert alert-info"><i class="fas fa-headset"></i><div>Service client disponible 7j/7</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="app-footer">
+            <p>&copy; 2025 Boutique KOLA - Tous droits réservés</p>
+        </div>
+    </div>
+
+    <script>
+        // Configuration - Comptes utilisateurs
+        const USERS = {
+            admin: { password: 'admin123', role: 'admin', name: 'Administrateur' },
+            user: { password: 'user1', role: 'user', name: 'Utilisateur' }
+        };
+        
+        // Données globales
+        let products = {};
+        let salesHistory = [];
+        let currentSale = [];
+        let scannerActive = false;
+        let stream = null;
+        let currentCategoryFilter = 'all';
+        let isAuthenticated = false;
+        let currentUser = null;
+        let userRole = null;
+        
+        // Graphiques
+        let salesChart, categoryChart, inventorySalesChart, stockChart;
+        
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', function() {
+            loadData();
+            
+            const savedAuth = localStorage.getItem('isAuthenticated');
+            const savedUser = localStorage.getItem('currentUser');
+            const savedRole = localStorage.getItem('userRole');
+            
+            if (savedAuth === 'true' && savedUser && savedRole) {
+                isAuthenticated = true;
+                currentUser = savedUser;
+                userRole = savedRole;
+                showApp();
+                updateUIForRole();
+            } else {
+                showAuth();
+            }
+            
+            // Événements
+            document.getElementById('login-form').addEventListener('submit', handleLogin);
+            document.getElementById('logout-btn').addEventListener('click', handleLogout);
+            
+            document.querySelectorAll('.main-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.dataset.tab;
+                    const isAdminOnly = tab.dataset.adminOnly === 'true';
+                    if (isAdminOnly && userRole !== 'admin') {
+                        showLockOverlay(tabId);
+                        return;
+                    }
+                    switchTab(tabId);
+                });
+            });
+            
+            // Scanner
+            document.getElementById('start-scanner').addEventListener('click', startScanner);
+            document.getElementById('stop-scanner').addEventListener('click', stopScanner);
+            document.getElementById('send-whatsapp').addEventListener('click', sendWhatsAppSale);
+            
+            // Produits
+            document.getElementById('generate-qr').addEventListener('click', generateProduct);
+            document.getElementById('print-all').addEventListener('click', printAllQRCodes);
+            document.getElementById('send-order').addEventListener('click', sendOrder);
+            
+            // Boutons JSON
+            document.getElementById('import-json').addEventListener('click', () => document.getElementById('file-input').click());
+            document.getElementById('export-json').addEventListener('click', exportJson);
+            document.getElementById('reset-data').addEventListener('click', resetData);
+            document.getElementById('file-input').addEventListener('change', importJson);
+            
+            // Filtres
+            document.querySelectorAll('#category-filters .category-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('#category-filters .category-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentCategoryFilter = this.dataset.category;
+                    renderQRCodes();
+                });
+            });
+            
+            initializeCharts();
+            updateDashboard();
+            updateCharts();
+            renderSalesJournal();
+            renderQRCodes();
+            updateTopProducts();
+        });
+        
+        // ===== FONCTIONS JSON =====
+        function exportJson() {
+            if (userRole !== 'admin') { showLockOverlay('products'); return; }
+            const data = { products: products, salesHistory: salesHistory, exportDate: new Date().toISOString(), version: "1.0" };
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `boutique-kola-export-${new Date().toISOString().slice(0, 19)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showToast('✅ Données exportées avec succès !', 'success');
+        }
+        
+        function importJson(event) {
+            if (userRole !== 'admin') { showLockOverlay('products'); return; }
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (confirm('⚠️ Attention: L\'importation remplacera TOUTES les données actuelles. Continuer ?')) {
+                        if (data.products) products = data.products;
+                        if (data.salesHistory) salesHistory = data.salesHistory;
+                        saveData();
+                        renderQRCodes();
+                        updateDashboard();
+                        updateCharts();
+                        renderSalesJournal();
+                        updateTopProducts();
+                        showToast('✅ Données importées avec succès !', 'success');
+                    }
+                } catch (error) {
+                    showToast('❌ Erreur: Fichier JSON invalide', 'error');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+        
+        function resetData() {
+            if (userRole !== 'admin') { showLockOverlay('products'); return; }
+            if (confirm('⚠️⚠️⚠️ ATTENTION : Cette action va SUPPRIMER DÉFINITIVEMENT toutes les données. Confirmer ?')) {
+                if (confirm('DERNIÈRE CONFIRMATION : Êtes-vous ABSOLUMENT sûr ?')) {
+                    products = {};
+                    salesHistory = [];
+                    currentSale = [];
+                    saveData();
+                    renderQRCodes();
+                    updateDashboard();
+                    updateCharts();
+                    renderSalesJournal();
+                    updateTopProducts();
+                    showToast('✅ Toutes les données ont été réinitialisées', 'success');
+                }
+            }
+        }
+        
+        // ===== FONCTIONS AUTHENTIFICATION =====
+        function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const user = USERS[username];
+            if (user && user.password === password) {
+                isAuthenticated = true;
+                currentUser = username;
+                userRole = user.role;
+                localStorage.setItem('isAuthenticated', 'true');
+                localStorage.setItem('currentUser', username);
+                localStorage.setItem('userRole', user.role);
+                showApp();
+                updateUIForRole();
+                const roleName = user.role === 'admin' ? 'Administrateur' : 'Utilisateur';
+                showToast(`✅ Bienvenue ${user.name} (${roleName}) !`, 'success');
+            } else {
+                document.getElementById('auth-error').textContent = '❌ Identifiant ou mot de passe incorrect';
+                showToast('Identifiant ou mot de passe incorrect', 'error');
+            }
+        }
+        
+        function handleLogout() {
+            isAuthenticated = false;
+            currentUser = null;
+            userRole = null;
+            localStorage.removeItem('isAuthenticated');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('userRole');
+            showAuth();
+            showToast('Déconnexion réussie', 'info');
+        }
+        
+        function updateUIForRole() {
+            const user = USERS[currentUser];
+            const roleName = user.role === 'admin' ? '👑 Administrateur' : '👤 Utilisateur';
+            const roleIcon = user.role === 'admin' ? 'fa-user-shield' : 'fa-user';
+            document.getElementById('user-icon').className = `fas ${roleIcon}`;
+            document.getElementById('username-display').textContent = user.name;
+            document.getElementById('user-role').textContent = roleName;
+            document.querySelectorAll('.main-tab').forEach(tab => {
+                const isAdminOnly = tab.dataset.adminOnly === 'true';
+                if (isAdminOnly && user.role !== 'admin') {
+                    tab.classList.add('disabled');
+                } else {
+                    tab.classList.remove('disabled');
+                }
+            });
+            if (user.role !== 'admin') {
+                switchTab('scan');
+            } else {
+                switchTab('dashboard');
+            }
+        }
+        
+        function showApp() {
+            document.getElementById('auth-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+        }
+        
+        function showAuth() {
+            document.getElementById('auth-container').style.display = 'flex';
+            document.getElementById('app-container').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('auth-error').textContent = '';
+        }
+        
+        function showLockOverlay(tabName) {
+            const overlay = document.createElement('div');
+            overlay.className = 'tab-locked-overlay';
+            overlay.innerHTML = `
+                <div class="lock-message">
+                    <i class="fas fa-lock"></i>
+                    <h3>🔐 Accès restreint</h3>
+                    <p>Cette section est réservée à l'administrateur.<br>Veuillez vous connecter avec un compte administrateur.</p>
+                    <button class="btn" onclick="this.closest('.tab-locked-overlay').remove()"><i class="fas fa-times"></i> Fermer</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+        }
+        
+        function switchTab(tabId) {
+            const tab = document.querySelector(`.main-tab[data-tab="${tabId}"]`);
+            if (tab && tab.classList.contains('disabled')) { showLockOverlay(tabId); return; }
+            document.querySelectorAll('.main-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.querySelector(`.main-tab[data-tab="${tabId}"]`).classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+            if (tabId === 'inventory' && userRole === 'admin') { updateCharts(); updateTopProducts(); }
+        }
+        
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            const icon = type === 'success' ? 'fa-check-circle' : type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle';
+            const color = type === 'success' ? '#10B981' : type === 'error' ? '#EF4444' : '#3B82F6';
+            toast.style.background = color;
+            toast.innerHTML = `<i class="fas ${icon}"></i> ${message}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+        
+        function loadData() {
+            const savedProducts = localStorage.getItem('products');
+            const savedSales = localStorage.getItem('salesHistory');
+            products = savedProducts ? JSON.parse(savedProducts) : {};
+            salesHistory = savedSales ? JSON.parse(savedSales) : [];
+        }
+        
+        function saveData() {
+            localStorage.setItem('products', JSON.stringify(products));
+            localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+        }
+        
+        function updateDashboard() {
+            if (userRole !== 'admin') return;
+            let totalRevenue = 0, totalSold = 0, totalStock = 0;
+            for (const id in products) {
+                const p = products[id];
+                totalStock += p.quantity || 0;
+                totalSold += p.sold || 0;
+                totalRevenue += (p.sold || 0) * p.price;
+            }
+            const totalItems = totalStock + totalSold;
+            const salesRate = totalItems > 0 ? Math.round((totalSold / totalItems) * 100) : 0;
+            document.getElementById('total-revenue').innerHTML = totalRevenue.toLocaleString() + ' FCFA';
+            document.getElementById('total-sold').innerHTML = totalSold;
+            document.getElementById('total-stock').innerHTML = totalStock;
+            document.getElementById('sales-rate').innerHTML = salesRate + '%';
+        }
+        
+        function initializeCharts() {
+            const salesCtx = document.getElementById('sales-chart')?.getContext('2d');
+            const categoryCtx = document.getElementById('category-chart')?.getContext('2d');
+            const inventoryCtx = document.getElementById('inventory-sales-chart')?.getContext('2d');
+            const stockCtx = document.getElementById('stock-chart')?.getContext('2d');
+            if (salesCtx) salesChart = new Chart(salesCtx, { type: 'line', data: { labels: [], datasets: [{ label: 'Ventes (FCFA)', data: [], borderColor: '#7C3AED', backgroundColor: 'rgba(124,58,237,0.1)', fill: true, tension: 0.4 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            if (categoryCtx) categoryChart = new Chart(categoryCtx, { type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: ['#7C3AED', '#F59E0B', '#EF4444', '#3B82F6', '#8B5CF6', '#EC4899'] }] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } } });
+            if (inventoryCtx) inventorySalesChart = new Chart(inventoryCtx, { type: 'bar', data: { labels: [], datasets: [{ label: 'CA (FCFA)', data: [], backgroundColor: '#7C3AED', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            if (stockCtx) stockChart = new Chart(stockCtx, { type: 'bar', data: { labels: [], datasets: [{ label: 'Stock', data: [], backgroundColor: '#F59E0B', borderRadius: 8 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+        
+        function updateCharts() {
+            if (userRole !== 'admin') return;
+            const salesByDate = {};
+            salesHistory.forEach(sale => { const date = new Date(sale.timestamp).toLocaleDateString(); salesByDate[date] = (salesByDate[date] || 0) + sale.total; });
+            if (salesChart) { salesChart.data.labels = Object.keys(salesByDate); salesChart.data.datasets[0].data = Object.values(salesByDate); salesChart.update(); }
+            const salesByCategory = {};
+            for (const id in products) { const p = products[id]; const revenue = (p.sold || 0) * p.price; if (revenue > 0) salesByCategory[p.category] = (salesByCategory[p.category] || 0) + revenue; }
+            if (categoryChart) { categoryChart.data.labels = Object.keys(salesByCategory); categoryChart.data.datasets[0].data = Object.values(salesByCategory); categoryChart.update(); }
+            const stockByCategory = {};
+            for (const id in products) { const p = products[id]; stockByCategory[p.category] = (stockByCategory[p.category] || 0) + (p.quantity || 0); }
+            if (stockChart) { stockChart.data.labels = Object.keys(stockByCategory); stockChart.data.datasets[0].data = Object.values(stockByCategory); stockChart.update(); }
+            const topProducts = Object.values(products).sort((a, b) => (b.sold || 0) - (a.sold || 0)).slice(0, 5);
+            if (inventorySalesChart) { inventorySalesChart.data.labels = topProducts.map(p => p.name); inventorySalesChart.data.datasets[0].data = topProducts.map(p => (p.sold || 0) * p.price); inventorySalesChart.update(); }
+        }
+        
+        function renderSalesJournal() {
+            if (userRole !== 'admin') return;
+            const container = document.getElementById('sales-journal');
+            if (salesHistory.length === 0) { container.innerHTML = '<p>Aucune vente enregistrée</p>'; return; }
+            container.innerHTML = '';
+            salesHistory.slice().reverse().slice(0, 10).forEach(sale => {
+                const entry = document.createElement('div');
+                entry.className = 'journal-entry';
+                entry.innerHTML = `<div class="journal-time">📅 ${new Date(sale.timestamp).toLocaleString()}</div><div>📦 ${sale.items.length} article(s) - Total: <strong>${sale.total.toLocaleString()} FCFA</strong></div>`;
+                container.appendChild(entry);
+            });
+        }
+        
+        function renderQRCodes() {
+            const container = document.getElementById('qr-codes-container');
+            if (!container) return;
+            container.innerHTML = '';
+            let hasProducts = false;
+            for (const id in products) {
+                const p = products[id];
+                if (currentCategoryFilter !== 'all' && p.category !== currentCategoryFilter) continue;
+                hasProducts = true;
+                const card = document.createElement('div');
+                card.className = 'qr-card';
+                if ((p.quantity || 0) <= 0) { const badge = document.createElement('div'); badge.className = 'sold-badge'; badge.innerHTML = 'Vendu'; card.appendChild(badge); }
+                QRCode.toDataURL(JSON.stringify({ id: p.id, name: p.name, price: p.price, category: p.category }), { width: 150, margin: 1 }, function(err, url) {
+                    if (!err) {
+                        card.innerHTML += `<img src="${url}" alt="QR Code"><p><strong>${p.name}</strong></p><p style="color: var(--primary); font-weight: bold;">${p.price.toLocaleString()} FCFA</p><p>📦 Stock: ${p.quantity || 0}</p>`;
+                        container.appendChild(card);
+                    }
+                });
+            }
+            if (!hasProducts) container.innerHTML = '<p>Aucun QR code généré</p>';
+        }
+        
+        function generateProduct() {
+            if (userRole !== 'admin') { showLockOverlay('products'); return; }
+            const name = document.getElementById('product-name').value.trim();
+            const price = parseInt(document.getElementById('product-price').value);
+            const quantity = parseInt(document.getElementById('product-quantity').value);
+            const category = document.getElementById('product-category').value;
+            if (!name || !price || !quantity) { showToast('Veuillez remplir tous les champs', 'warning'); return; }
+            const id = Date.now().toString();
+            products[id] = { id, name, price, quantity, category, sold: 0 };
+            saveData();
+            renderQRCodes();
+            updateDashboard();
+            updateCharts();
+            updateTopProducts();
+            document.getElementById('product-name').value = '';
+            document.getElementById('product-price').value = '';
+            document.getElementById('product-quantity').value = '1';
+            showToast('✅ Produit ajouté avec succès !', 'success');
+        }
+        
+        function printAllQRCodes() {
+            if (userRole !== 'admin') { showLockOverlay('products'); return; }
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`<html><head><title>QR Codes - Boutique KOLA</title><style>body{font-family:Arial,sans-serif;padding:20px;text-align:center}h1{color:#7C3AED}.qr-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}.qr-card{text-align:center;border:1px solid #ddd;padding:15px;border-radius:10px}.qr-card img{max-width:150px}@media print{.qr-grid{grid-template-columns:repeat(4,1fr)}}@media (max-width:768px){.qr-grid{grid-template-columns:repeat(2,1fr)}}</style></head><body><h1>🏪 Boutique KOLA - QR Codes</h1><div class="qr-grid">`);
+            for (const id in products) {
+                const p = products[id];
+                printWindow.document.write(`<div class="qr-card"><img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(JSON.stringify({ id: p.id, name: p.name, price: p.price }))}&size=150x150"><p><strong>${p.name}</strong></p><p style="color:#7C3AED;">${p.price.toLocaleString()} FCFA</p></div>`);
+            }
+            printWindow.document.write(`</div></body></html>`);
+            printWindow.document.close();
+            printWindow.print();
+        }
+        
+        async function startScanner() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+                document.getElementById('video').srcObject = stream;
+                scannerActive = true;
+                document.getElementById('start-scanner').style.display = 'none';
+                document.getElementById('stop-scanner').style.display = 'inline-flex';
+                scanQRCode();
+                showToast('📷 Scanner activé', 'success');
+            } catch (err) { showToast('❌ Erreur caméra', 'error'); }
+        }
+        
+        function stopScanner() {
+            scannerActive = false;
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            document.getElementById('start-scanner').style.display = 'inline-flex';
+            document.getElementById('stop-scanner').style.display = 'none';
+            showToast('📷 Scanner arrêté', 'info');
+        }
+        
+        function scanQRCode() {
+            if (!scannerActive) return;
+            const video = document.getElementById('video');
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            function tick() {
+                if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                    canvas.height = video.videoHeight;
+                    canvas.width = video.videoWidth;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    if (code) processScannedCode(code.data);
+                }
+                if (scannerActive) requestAnimationFrame(tick);
+            }
+            tick();
+        }
+        
+        function processScannedCode(code) {
+            try {
+                const productData = JSON.parse(code);
+                const product = products[productData.id];
+                if (!product) { showResult('❌ Produit non trouvé', 'danger'); return; }
+                if (product.quantity <= 0) { showResult('⚠️ Stock épuisé', 'warning'); return; }
+                const existing = currentSale.find(item => item.id === productData.id);
+                if (existing) {
+                    if (existing.quantity >= product.quantity) { showResult('⚠️ Stock insuffisant', 'warning'); return; }
+                    existing.quantity++;
+                } else {
+                    currentSale.push({ id: productData.id, name: product.name, price: product.price, quantity: 1 });
+                }
+                updateSaleDisplay();
+                showResult(`✅ Ajouté: ${product.name}`, 'success');
+            } catch (e) { showResult('❌ QR Code invalide', 'danger'); }
+        }
+        
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('qr-result');
+            resultDiv.innerHTML = `<i class="fas ${type === 'success' ? 'fa-check-circle' : type === 'warning' ? 'fa-exclamation-triangle' : 'fa-times-circle'}"></i> ${message}`;
+            resultDiv.className = `alert alert-${type}`;
+            resultDiv.style.display = 'block';
+            setTimeout(() => resultDiv.style.display = 'none', 2000);
+        }
+        
+        function updateSaleDisplay() {
+            const container = document.getElementById('sale-items');
+            let total = 0;
+            if (currentSale.length === 0) { container.innerHTML = '<p>Aucun article scanné</p>'; document.getElementById('sale-total').innerHTML = 'Total: 0 FCFA'; return; }
+            container.innerHTML = '';
+            currentSale.forEach((item, index) => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                const div = document.createElement('div');
+                div.className = 'sale-item';
+                div.innerHTML = `<span><strong>${item.name}</strong> x${item.quantity}</span><span>${itemTotal.toLocaleString()} FCFA</span><button class="btn-danger btn-sm" style="padding:4px 8px;" onclick="removeSaleItem(${index})"><i class="fas fa-trash"></i></button>`;
+                container.appendChild(div);
+            });
+            document.getElementById('sale-total').innerHTML = `Total: ${total.toLocaleString()} FCFA`;
+        }
+        
+        function removeSaleItem(index) { currentSale.splice(index, 1); updateSaleDisplay(); showToast('Article retiré', 'info'); }
+        window.removeSaleItem = removeSaleItem;
+        
+        function sendWhatsAppSale() {
+            if (currentSale.length === 0) { showToast('Aucun article à vendre', 'warning'); return; }
+            let message = "🛍️ *NOUVELLE VENTE* 🛍️%0A%0A";
+            let total = 0;
+            currentSale.forEach(item => {
+                const itemTotal = item.price * item.quantity;
+                total += itemTotal;
+                message += `➡️ *${item.name}* x${item.quantity} : ${itemTotal.toLocaleString()} FCFA%0A`;
+                const product = products[item.id];
+                if (product) { product.quantity -= item.quantity; product.sold = (product.sold || 0) + item.quantity; }
+            });
+            message += `%0A💰 *TOTAL: ${total.toLocaleString()} FCFA*%0A%0A📅 Date: ${new Date().toLocaleString()}`;
+            salesHistory.push({ timestamp: Date.now(), items: [...currentSale], total });
+            saveData();
+            currentSale = [];
+            updateSaleDisplay();
+            updateDashboard();
+            updateCharts();
+            renderSalesJournal();
+            renderQRCodes();
+            updateTopProducts();
+            window.open(`https://wa.me/22892871605?text=${message}`, '_blank');
+            showToast('✅ Vente enregistrée !', 'success');
+        }
+        
+        function sendOrder() {
+            if (userRole !== 'admin') { showLockOverlay('orders'); return; }
+            const name = document.getElementById('order-name').value.trim();
+            const whatsapp = document.getElementById('order-whatsapp').value.trim();
+            const region = document.getElementById('order-region').value;
+            const city = document.getElementById('order-city').value.trim();
+            const address = document.getElementById('order-address').value.trim();
+            const items = document.getElementById('order-items').value.trim();
+            if (!name || !whatsapp || !region || !city || !address) { showToast('Veuillez remplir tous les champs', 'warning'); return; }
+            let message = "🛍️ *NOUVELLE COMMANDE* 🛍️%0A%0A";
+            message += `👤 *Client:* ${name}%0A📱 *WhatsApp:* ${whatsapp}%0A📍 *Région:* ${region}%0A🏙️ *Ville:* ${city}%0A📬 *Adresse:* ${address}%0A`;
+            if (items) message += `%0A📦 *Articles:*%0A${items}%0A`;
+            message += `%0A📅 *Date:* ${new Date().toLocaleString()}`;
+            window.open(`https://wa.me/22892871605?text=${message}`, '_blank');
+            showToast('✅ Commande envoyée !', 'success');
+            document.getElementById('order-name').value = '';
+            document.getElementById('order-whatsapp').value = '';
+            document.getElementById('order-region').value = '';
+            document.getElementById('order-city').value = '';
+            document.getElementById('order-address').value = '';
+            document.getElementById('order-items').value = '';
+        }
+        
+        function updateTopProducts() {
+            if (userRole !== 'admin') return;
+            const tbody = document.querySelector('#top-products-table tbody');
+            const productsArray = Object.values(products).sort((a, b) => (b.sold || 0) - (a.sold || 0));
+            if (productsArray.length === 0) { tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Aucune donnée</td></tr>'; return; }
+            tbody.innerHTML = '';
+            productsArray.slice(0, 10).forEach(p => {
+                const row = document.createElement('tr');
+                row.innerHTML = `<td><strong>${p.name}</strong></td><td>${p.category}</td><td>${p.sold || 0}</td><td>${p.quantity || 0}</td><td><strong>${((p.sold || 0) * p.price).toLocaleString()} FCFA</strong></td>`;
+                tbody.appendChild(row);
+            });
+        }
+    </script>
+</body>
+</html>

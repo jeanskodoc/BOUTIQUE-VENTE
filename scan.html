@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système Sécurisé de Gestion des Ventes</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 15px;
+        }
+        
+        /* Bouton Retour */
+        .btn-retour {
+            padding: 12px 20px;
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: #333;
+        }
+        
+        .btn-retour:hover {
+            background-color: #e0e0e0;
+            transform: translateX(-3px);
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding: 20px 15px;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .app-description {
+            font-size: 16px;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .dashboard-card {
+            background: white;
+            padding: 20px 15px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .dashboard-card h3 {
+            color: #128C7E;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .dashboard-card .value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #25D366;
+        }
+        
+        .main-content {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .left-panel, .right-panel {
+            flex: 1;
+            min-width: 300px;
+        }
+        
+        .panel {
+            background-color: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .panel-title {
+            font-size: 20px;
+            margin-bottom: 15px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #25D366;
+            color: #128C7E;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        /* Styles pour le scanner */
+        #scanner-container {
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+        }
+        
+        #video {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        #scan-region {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 70%;
+            height: 200px;
+            border: 3px solid #25D366;
+            border-radius: 12px;
+            box-shadow: 0 0 0 4000px rgba(0, 0, 0, 0.4);
+        }
+        
+        .scanner-controls {
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background-color: #25D366;
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 50px;
+        }
+        
+        button:hover {
+            background-color: #128C7E;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        button#stop-scanner {
+            background-color: #ff4444;
+        }
+        
+        button#stop-scanner:hover {
+            background-color: #cc0000;
+        }
+        
+        /* Styles pour la liste des ventes */
+        .sale-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+        
+        .sale-item:last-child {
+            border-bottom: none;
+        }
+        
+        .sale-total {
+            font-weight: bold;
+            text-align: right;
+            margin-top: 15px;
+            font-size: 20px;
+            color: #128C7E;
+            padding-top: 15px;
+            border-top: 2px solid #eee;
+        }
+        
+        /* Styles pour le formulaire d'articles */
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        input, select {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border 0.3s ease;
+        }
+        
+        input:focus, select:focus {
+            border-color: #25D366;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 211, 102, 0.1);
+        }
+        
+        /* Styles pour les catégories */
+        .categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .category-btn {
+            background-color: #e0e0e0;
+            color: #555;
+            padding: 10px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+        
+        .category-btn.active {
+            background-color: #25D366;
+            color: white;
+        }
+        
+        /* Styles pour les QR codes générés */
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .qr-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+            position: relative;
+            border: 1px solid #eee;
+        }
+        
+        .qr-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .qr-card img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+        
+        .qr-card p {
+            margin-top: 10px;
+            font-size: 14px;
+            font-weight: bold;
+            color: #333;
+            line-height: 1.4;
+        }
+        
+        .qr-card .price {
+            color: #25D366;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        /* Indicateur d'article vendu */
+        .sold-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #ff4444;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(255, 68, 68, 0.3);
+        }
+        
+        /* Section WhatsApp */
+        .whatsapp-section {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+        
+        #send-whatsapp {
+            background-color: #25D366;
+            padding: 16px 32px;
+            font-size: 18px;
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        /* Résultat du scan */
+        #qr-result {
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            color: #25D366;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #f0fff0;
+            border: 1px solid #25D366;
+            font-size: 16px;
+        }
+        
+        /* Journal des ventes */
+        .sales-journal {
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .journal-entry {
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+            font-size: 14px;
+            background: white;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .journal-entry:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+        
+        .journal-time {
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+        
+        .journal-product {
+            font-weight: bold;
+        }
+        
+        .journal-price {
+            color: #25D366;
+            font-weight: bold;
+        }
+        
+        /* Graphiques */
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-top: 20px;
+        }
+        
+        /* Instructions */
+        .instructions {
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 15px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        /* Footer */
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #777;
+            font-size: 14px;
+            padding: 20px;
+            border-top: 1px solid #eee;
+        }
+        
+        /* Authentification */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            padding: 20px;
+        }
+        
+        .auth-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .auth-title {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #128C7E;
+            font-size: 24px;
+        }
+        
+        .auth-logo {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 20px;
+            color: #25D366;
+        }
+        
+        .auth-error {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .auth-success {
+            color: #25D366;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        
+        .hidden {
+            display: none !important;
+        }
+        
+        .logout-btn {
+            background-color: #ff4444;
+            padding: 10px 20px;
+            font-size: 14px;
+        }
+        
+        .logout-btn:hover {
+            background-color: #cc0000;
+        }
+        
+        /* Nouveau style pour les statistiques par catégorie */
+        .category-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .category-stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .category-stat-card:hover {
+            transform: translateY(-3px);
+        }
+        
+        .category-stat-card h4 {
+            color: #128C7E;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        
+        .category-stat-card .value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #25D366;
+        }
+        
+        .category-stat-card .sub-value {
+            font-size: 14px;
+            color: #777;
+        }
+        
+        /* Boutons d'import/export */
+        .data-management {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .data-management button {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 15px;
+            font-size: 14px;
+        }
+        
+        #import-json {
+            background-color: #17a2b8;
+        }
+        
+        #import-json:hover {
+            background-color: #138496;
+        }
+        
+        #export-json {
+            background-color: #28a745;
+        }
+        
+        #export-json:hover {
+            background-color: #218838;
+        }
+        
+        #reset-data {
+            background-color: #dc3545;
+        }
+        
+        #reset-data:hover {
+            background-color: #c82333;
+        }
+        
+        /* Input file caché */
+        #file-input {
+            display: none;
+        }
+        
+        /* Onglets */
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #ddd;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 12px 20px;
+            background: #f0f0f0;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 15px;
+            flex: 1;
+            min-width: 140px;
+            text-align: center;
+        }
+        
+        .tab-btn.active {
+            background: #25D366;
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* ===== RESPONSIVE DESIGN ===== */
+        
+        /* Tablettes grandes (≥ 1024px) */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 32px;
+            }
+            
+            .dashboard {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        /* Tablettes moyennes (768px - 1023px) */
+        @media (max-width: 1023px) and (min-width: 768px) {
+            .container {
+                padding: 18px;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+            
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .qr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+            
+            .category-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        /* Tablettes petites et grands mobiles (576px - 767px) */
+        @media (max-width: 767px) and (min-width: 576px) {
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .dashboard-card {
+                padding: 15px 10px;
+            }
+            
+            .main-content {
+                gap: 15px;
+            }
+            
+            .panel {
+                padding: 15px;
+            }
+            
+            .qr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                gap: 12px;
+            }
+            
+            .category-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .tab-btn {
+                min-width: 120px;
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+        
+        /* Mobiles moyens (414px - 575px) */
+        @media (max-width: 575px) and (min-width: 414px) {
+            .container {
+                padding: 12px;
+            }
+            
+            header {
+                padding: 15px 12px;
+                margin-bottom: 20px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .app-description {
+                font-size: 14px;
+            }
+            
+            .dashboard {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            .dashboard-card {
+                padding: 15px 8px;
+            }
+            
+            .dashboard-card h3 {
+                font-size: 14px;
+            }
+            
+            .dashboard-card .value {
+                font-size: 20px;
+            }
+            
+            .main-content {
+                gap: 12px;
+            }
+            
+            .left-panel, .right-panel {
+                min-width: 100%;
+            }
+            
+            .panel {
+                padding: 15px 12px;
+                margin-bottom: 15px;
+            }
+            
+            .panel-title {
+                font-size: 18px;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            button {
+                padding: 12px 20px;
+                font-size: 15px;
+                min-height: 44px;
+            }
+            
+            .qr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 10px;
+            }
+            
+            .qr-card {
+                padding: 12px;
+            }
+            
+            .category-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .tab-buttons {
+                flex-direction: column;
+            }
+            
+            .tab-btn {
+                min-width: 100%;
+                margin-bottom: 5px;
+            }
+            
+            .scanner-controls {
+                flex-direction: column;
+            }
+            
+            .scanner-controls button {
+                width: 100%;
+            }
+            
+            #scan-region {
+                width: 80%;
+                height: 180px;
+            }
+        }
+        
+        /* Petits mobiles (≤ 413px) */
+        @media (max-width: 413px) {
+            .container {
+                padding: 10px;
+            }
+            
+            header {
+                padding: 12px 10px;
+                margin-bottom: 15px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            .app-description {
+                font-size: 13px;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+            
+            .dashboard-card {
+                padding: 12px 8px;
+            }
+            
+            .dashboard-card h3 {
+                font-size: 13px;
+            }
+            
+            .dashboard-card .value {
+                font-size: 18px;
+            }
+            
+            .main-content {
+                gap: 10px;
+            }
+            
+            .panel {
+                padding: 12px 10px;
+                margin-bottom: 12px;
+            }
+            
+            .panel-title {
+                font-size: 16px;
+            }
+            
+            button {
+                padding: 10px 16px;
+                font-size: 14px;
+                min-height: 44px;
+            }
+            
+            .form-group {
+                margin-bottom: 15px;
+            }
+            
+            input, select {
+                padding: 12px;
+                font-size: 16px; /* Évite le zoom sur iOS */
+            }
+            
+            .qr-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 8px;
+            }
+            
+            .qr-card {
+                padding: 10px;
+            }
+            
+            .qr-card p {
+                font-size: 12px;
+            }
+            
+            .categories {
+                gap: 6px;
+            }
+            
+            .category-btn {
+                padding: 8px 12px;
+                font-size: 12px;
+            }
+            
+            #scan-region {
+                width: 85%;
+                height: 150px;
+            }
+            
+            #video {
+                height: 250px;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .auth-box {
+                padding: 20px 15px;
+            }
+            
+            .auth-title {
+                font-size: 20px;
+            }
+        }
+        
+        /* Orientation paysage sur mobiles */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .auth-container {
+                padding: 10px;
+            }
+            
+            .auth-box {
+                padding: 20px;
+            }
+            
+            #video {
+                height: 200px;
+            }
+            
+            #scan-region {
+                height: 120px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="btn-retour" onclick="history.back()">
+            <i class="fas fa-arrow-left"></i> Retour
+        </button>
+    </div>
+    
+    <div class="auth-container" id="auth-container">
+        <div class="auth-box">
+            <div class="auth-logo">
+                <i class="fas fa-store"></i> KOLA SHOP
+            </div>
+            <h2 class="auth-title">Authentification Requise</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username"><i class="fas fa-user"></i> Identifiant</label>
+                    <input type="text" id="username" placeholder="Votre identifiant" required>
+                </div>
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Mot de passe</label>
+                    <input type="password" id="password" placeholder="Votre mot de passe" required>
+                </div>
+                <button type="submit" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
+            </form>
+            <div id="auth-error" class="auth-error"></div>
+            <div id="auth-success" class="auth-success"></div>
+        </div>
+    </div>
+
+    <div class="container hidden" id="app-container">
+        <header>
+            <h1>
+                <i class="fas fa-chart-line"></i> 
+                Système Sécurisé de Gestion des Ventes 
+                <button id="logout-btn" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
+            </h1>
+            <p class="app-description">Accès sécurisé pour la gestion des articles et des ventes</p>
+        </header>
+        
+        <div class="dashboard">
+            <div class="dashboard-card">
+                <h3><i class="fas fa-money-bill-wave"></i> Total des Ventes</h3>
+                <div class="value" id="total-sales">0 FCFA</div>
+            </div>
+            <div class="dashboard-card">
+                <h3><i class="fas fa-shopping-cart"></i> Articles Vendus</h3>
+                <div class="value" id="total-items-sold">0</div>
+            </div>
+            <div class="dashboard-card">
+                <h3><i class="fas fa-boxes"></i> Articles en Stock</h3>
+                <div class="value" id="total-items-stock">0</div>
+            </div>
+            <div class="dashboard-card">
+                <h3><i class="fas fa-chart-pie"></i> Taux de Vente</h3>
+                <div class="value" id="sales-rate">0%</div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <p><strong><i class="fas fa-info-circle"></i> Instructions :</strong> Ajoutez d'abord des articles avec leurs QR codes. Ensuite, utilisez le scanner pour enregistrer les ventes. Consultez les onglets pour voir les analyses et le journal des ventes.</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-qrcode"></i> Scanner QR Code
+                    </h2>
+                    <div id="scanner-container">
+                        <video id="video" autoplay playsinline></video>
+                        <div id="scan-region"></div>
+                    </div>
+                    <div id="qr-result"></div>
+                    
+                    <div class="scanner-controls">
+                        <button id="start-scanner">
+                            <i class="fas fa-camera"></i> Démarrer le Scanner
+                        </button>
+                        <button id="stop-scanner" class="hidden">
+                            <i class="fas fa-stop"></i> Arrêter le Scanner
+                        </button>
+                    </div>
+                </div>
+        
+                
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-receipt"></i> Détails de la vente
+                    </h2>
+                    <div id="sale-items">
+                        <p id="no-items">Aucun article scanné pour le moment</p>
+                    </div>
+                    <div class="sale-total" id="sale-total">Total: 0 FCFA</div>
+                    
+                    <div class="whatsapp-section">
+                        <button id="send-whatsapp">
+                            <i class="fab fa-whatsapp"></i> Envoyer la vente par WhatsApp
+                        </button>
+                    </div>
+                     
+                </div>
+                
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-history"></i> Journal des Ventes
+                    </h2>
+                    <div class="sales-journal" id="sales-journal">
+                        <p id="no-journal-entries">Aucune vente enregistrée</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="right-panel">
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-plus-circle"></i> Ajouter un Article
+                    </h2>
+                    <div class="form-group">
+                        <label for="product-name"><i class="fas fa-tag"></i> Nom de l'article</label>
+                        <input type="text" id="product-name" placeholder="Ex: Téléphone XYZ">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-price"><i class="fas fa-money-bill"></i> Prix (FCFA)</label>
+                        <input type="number" id="product-price" placeholder="Ex: 45000">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-quantity"><i class="fas fa-box"></i> Quantité en stock</label>
+                        <input type="number" id="product-quantity" placeholder="Ex: 10" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-category"><i class="fas fa-folder"></i> Catégorie</label>
+                        <select id="product-category">
+                            <option value="électronique">Électronique</option>
+                            <option value="vêtements">Vêtements</option>
+                            <option value="alimentation">Alimentation</option>
+                            <option value="maison">Maison</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="product-week"><i class="fas fa-calendar"></i> Semaine</label>
+                        <select id="product-week">
+                            <option value="semaine1">Semaine 1</option>
+                            <option value="semaine2">Semaine 2</option>
+                            <option value="semaine3">Semaine 3</option>
+                            <option value="semaine4">Semaine 4</option>
+                        </select>
+                    </div>
+                    
+                    <button id="generate-qr">
+                        <i class="fas fa-qrcode"></i> Générer le QR Code
+                    </button>
+                    
+                    <div class="data-management">
+                        <button id="import-json">
+                            <i class="fas fa-file-import"></i> Importer JSON
+                        </button>
+                        <button id="export-json">
+                            <i class="fas fa-file-export"></i> Exporter JSON
+                        </button>
+                        <button id="reset-data">
+                            <i class="fas fa-trash"></i> Réinitialiser
+                        </button>
+                        <input type="file" id="file-input" accept=".json">
+                    </div>
+                </div>
+                
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-filter"></i> Filtrer les Articles
+                    </h2>
+                    <div class="form-group">
+                        <label><i class="fas fa-folder"></i> Catégories</label>
+                        <div class="categories">
+                            <div class="category-btn active" data-category="all">Tous</div>
+                            <div class="category-btn" data-category="électronique">Électronique</div>
+                            <div class="category-btn" data-category="vêtements">Vêtements</div>
+                            <div class="category-btn" data-category="alimentation">Alimentation</div>
+                            <div class="category-btn" data-category="maison">Maison</div>
+                            <div class="category-btn" data-category="autre">Autre</div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label><i class="fas fa-calendar"></i> Semaines</label>
+                        <div class="categories">
+                            <div class="category-btn active" data-week="all">Toutes</div>
+                            <div class="category-btn" data-week="semaine1">Semaine 1</div>
+                            <div class="category-btn" data-week="semaine2">Semaine 2</div>
+                            <div class="category-btn" data-week="semaine3">Semaine 3</div>
+                            <div class="category-btn" data-week="semaine4">Semaine 4</div>
+                        </div>
+                    </div>
+                    
+                    <button id="print-all">
+                        <i class="fas fa-print"></i> Imprimer tous les QR Codes
+                    </button>
+                </div>
+                
+                <div class="panel">
+                    <h2 class="panel-title">
+                        <i class="fas fa-qrcode"></i> Articles Générés
+                    </h2>
+                    <div id="qr-codes-container" class="qr-grid">
+                        <p id="no-qr-codes">Aucun QR code généré pour le moment</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <div class="tab-buttons">
+                <button class="tab-btn active" data-tab="sales-analysis">
+                    <i class="fas fa-chart-line"></i> Analyse des Ventes
+                </button>
+                <button class="tab-btn" data-tab="stock-analysis">
+                    <i class="fas fa-boxes"></i> Analyse du Stock
+                </button>
+                <button class="tab-btn" data-tab="category-analysis">
+                    <i class="fas fa-chart-bar"></i> Ventes par Catégorie
+                </button>
+                <button class="tab-btn" data-tab="category-stats">
+                    <i class="fas fa-chart-pie"></i> Statistiques par Catégorie
+                </button>
+            </div>
+            
+            <div class="tab-content active" id="sales-analysis">
+                <h2 class="panel-title">
+                    <i class="fas fa-chart-line"></i> Analyse des Ventes
+                </h2>
+                <div class="chart-container">
+                    <canvas id="sales-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="stock-analysis">
+                <h2 class="panel-title">
+                    <i class="fas fa-boxes"></i> Analyse du Stock
+                </h2>
+                <div class="chart-container">
+                    <canvas id="stock-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="category-analysis">
+                <h2 class="panel-title">
+                    <i class="fas fa-chart-bar"></i> Ventes par Catégorie
+                </h2>
+                <div class="chart-container">
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </div>
+            
+            <div class="tab-content" id="category-stats">
+                <h2 class="panel-title">
+                    <i class="fas fa-chart-pie"></i> Statistiques par Catégorie
+                </h2>
+                <div id="category-stats-container" class="category-stats">
+                    <!-- Les statistiques par catégorie seront générées ici -->
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p><i class="fas fa-store"></i> Système Sécurisé de Gestion des Ventes | <i class="fab fa-whatsapp"></i> WhatsApp: 92871605</p>
+        </footer>
+    </div>
+
+    <!-- Le script JavaScript reste identique à celui fourni précédemment -->
+    <script>
+        // Le code JavaScript complet reste exactement le même que dans votre version originale
+        // Il n'a pas été modifié pour maintenir la fonctionnalité
+        document.addEventListener('DOMContentLoaded', function() {
+            // Références aux éléments DOM
+            const authContainer = document.getElementById('auth-container');
+            const appContainer = document.getElementById('app-container');
+            const loginForm = document.getElementById('login-form');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('login-btn');
+            const authError = document.getElementById('auth-error');
+            const authSuccess = document.getElementById('auth-success');
+            const logoutBtn = document.getElementById('logout-btn');
+            
+            const video = document.getElementById('video');
+            const startScannerBtn = document.getElementById('start-scanner');
+            const stopScannerBtn = document.getElementById('stop-scanner');
+            const qrResult = document.getElementById('qr-result');
+            const saleItemsContainer = document.getElementById('sale-items');
+            const noItemsMessage = document.getElementById('no-items');
+            const saleTotalElement = document.getElementById('sale-total');
+            const sendWhatsAppBtn = document.getElementById('send-whatsapp');
+            const generateQrBtn = document.getElementById('generate-qr');
+            const printAllBtn = document.getElementById('print-all');
+            const qrCodesContainer = document.getElementById('qr-codes-container');
+            const noQrCodesMessage = document.getElementById('no-qr-codes');
+            const salesJournalContainer = document.getElementById('sales-journal');
+            const noJournalEntriesMessage = document.getElementById('no-journal-entries');
+            const categoryStatsContainer = document.getElementById('category-stats-container');
+            
+            // Nouveaux boutons
+            const importJsonBtn = document.getElementById('import-json');
+            const exportJsonBtn = document.getElementById('export-json');
+            const resetDataBtn = document.getElementById('reset-data');
+            const fileInput = document.getElementById('file-input');
+            
+            // Identifiants de connexion
+            const ADMIN_USERNAME = 'KOLA';
+            const ADMIN_PASSWORD = 'KOLA1@';
+            
+            // Tableaux de données
+            let scannerActive = false;
+            let stream = null;
+            let saleItems = [];
+            let totalAmount = 0;
+            let products = JSON.parse(localStorage.getItem('products')) || {};
+            let salesHistory = JSON.parse(localStorage.getItem('salesHistory')) || [];
+            let currentCategoryFilter = 'all';
+            let currentWeekFilter = 'all';
+            let isAuthenticated = localStorage.getItem('isAuthenticated') === 'true';
+            
+            // Graphiques
+            let salesChart, stockChart, categoryChart;
+            
+            // Vérifier l'authentification au chargement
+            if (isAuthenticated) {
+                showApp();
+            } else {
+                showAuth();
+            }
+            
+            // Gestion de l'authentification
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = usernameInput.value;
+                const password = passwordInput.value;
+                
+                if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+                    // Authentification réussie
+                    localStorage.setItem('isAuthenticated', 'true');
+                    isAuthenticated = true;
+                    authSuccess.textContent = 'Authentification réussie!';
+                    authError.textContent = '';
+                    
+                    setTimeout(() => {
+                        showApp();
+                    }, 1000);
+                } else {
+                    // Échec de l'authentification
+                    authError.textContent = 'Identifiant ou mot de passe incorrect';
+                    authSuccess.textContent = '';
+                }
+            });
+            
+            // Déconnexion
+            logoutBtn.addEventListener('click', function() {
+                localStorage.setItem('isAuthenticated', 'false');
+                isAuthenticated = false;
+                showAuth();
+            });
+            
+            function showApp() {
+                authContainer.classList.add('hidden');
+                appContainer.classList.remove('hidden');
+                initializeApp();
+            }
+            
+            function showAuth() {
+                authContainer.classList.remove('hidden');
+                appContainer.classList.add('hidden');
+                // Vider les champs d'authentification
+                usernameInput.value = '';
+                passwordInput.value = '';
+                authError.textContent = '';
+                authSuccess.textContent = '';
+            }
+            
+            function initializeApp() {
+                renderQrCodes();
+                updateDashboard();
+                setupEventListeners();
+                initializeCharts();
+                renderSalesJournal();
+                updateCategoryStats();
+            }
+            
+            function setupEventListeners() {
+                // Scanner
+                startScannerBtn.addEventListener('click', startScanner);
+                stopScannerBtn.addEventListener('click', stopScanner);
+                
+                // WhatsApp
+                sendWhatsAppBtn.addEventListener('click', sendWhatsApp);
+                
+                // Génération de QR codes
+                generateQrBtn.addEventListener('click', generateQrCode);
+                
+                // Impression
+                printAllBtn.addEventListener('click', printAllQrCodes);
+                
+                // Boutons d'import/export
+                importJsonBtn.addEventListener('click', () => fileInput.click());
+                fileInput.addEventListener('change', importJson);
+                exportJsonBtn.addEventListener('click', exportJson);
+                resetDataBtn.addEventListener('click', resetData);
+                
+                // Filtres
+                document.querySelectorAll('.category-btn[data-category]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.category-btn[data-category]').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        currentCategoryFilter = this.getAttribute('data-category');
+                        renderQrCodes();
+                    });
+                });
+                
+                document.querySelectorAll('.category-btn[data-week]').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.category-btn[data-week]').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        currentWeekFilter = this.getAttribute('data-week');
+                        renderQrCodes();
+                    });
+                });
+                
+                // Onglets
+                document.querySelectorAll('.tab-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const tabId = this.getAttribute('data-tab');
+                        
+                        // Désactiver tous les onglets
+                        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        
+                        // Activer l'onglet cliqué
+                        this.classList.add('active');
+                        document.getElementById(tabId).classList.add('active');
+                        
+                        // Mettre à jour les graphiques si nécessaire
+                        if (tabId === 'sales-analysis') {
+                            updateSalesChart();
+                        } else if (tabId === 'stock-analysis') {
+                            updateStockChart();
+                        } else if (tabId === 'category-analysis') {
+                            updateCategoryChart();
+                        } else if (tabId === 'category-stats') {
+                            updateCategoryStats();
+                        }
+                    });
+                });
+            }
+            
+            // Fonction pour importer un fichier JSON
+            function importJson(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        
+                        if (data.products && data.salesHistory) {
+                            // Demander confirmation avant d'importer
+                            if (confirm("Voulez-vous vraiment importer ces données? Les données actuelles seront remplacées.")) {
+                                products = data.products;
+                                salesHistory = data.salesHistory;
+                                
+                                // Sauvegarder dans le localStorage
+                                localStorage.setItem('products', JSON.stringify(products));
+                                localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+                                
+                                // Mettre à jour l'interface
+                                renderQrCodes();
+                                updateDashboard();
+                                updateAllCharts();
+                                updateCategoryStats();
+                                renderSalesJournal();
+                                
+                                alert("Données importées avec succès!");
+                            }
+                        } else {
+                            alert("Le fichier JSON n'a pas le format attendu.");
+                        }
+                    } catch (error) {
+                        console.error("Erreur lors de l'importation:", error);
+                        alert("Erreur lors de l'importation du fichier JSON.");
+                    }
+                };
+                reader.readAsText(file);
+                
+                // Réinitialiser l'input file
+                event.target.value = '';
+            }
+            
+            // Fonction pour exporter les données en JSON
+            function exportJson() {
+                const data = {
+                    products: products,
+                    salesHistory: salesHistory,
+                    exportDate: new Date().toISOString()
+                };
+                
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `export-data-${new Date().toISOString().slice(0, 10)}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            }
+            
+            // Fonction pour réinitialiser les données
+            function resetData() {
+                if (confirm("Êtes-vous sûr de vouloir réinitialiser toutes les données? Cette action est irréversible.")) {
+                    products = {};
+                    salesHistory = [];
+                    
+                    // Sauvegarder dans le localStorage
+                    localStorage.setItem('products', JSON.stringify(products));
+                    localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+                    
+                    // Mettre à jour l'interface
+                    renderQrCodes();
+                    updateDashboard();
+                    updateAllCharts();
+                    updateCategoryStats();
+                    renderSalesJournal();
+                    
+                    alert("Données réinitialisées avec succès!");
+                }
+            }
+            
+            function initializeCharts() {
+                const salesCtx = document.getElementById('sales-chart').getContext('2d');
+                salesChart = new Chart(salesCtx, {
+                    type: 'line',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Ventes (FCFA)',
+                            data: [],
+                            borderColor: '#25D366',
+                            backgroundColor: 'rgba(37, 211, 102, 0.1)',
+                            borderWidth: 2,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                const stockCtx = document.getElementById('stock-chart').getContext('2d');
+                stockChart = new Chart(stockCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Vendus', 'En stock'],
+                        datasets: [{
+                            data: [0, 0],
+                            backgroundColor: [
+                                '#25D366',
+                                '#128C7E'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false
+                    }
+                });
+                
+                const categoryCtx = document.getElementById('category-chart').getContext('2d');
+                categoryChart = new Chart(categoryCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: [],
+                        datasets: [{
+                            label: 'Ventes par catégorie (FCFA)',
+                            data: [],
+                            backgroundColor: '#25D366'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+                
+                updateAllCharts();
+            }
+            
+            function updateAllCharts() {
+                updateSalesChart();
+                updateStockChart();
+                updateCategoryChart();
+            }
+            
+            function updateSalesChart() {
+                // Regrouper les ventes par date
+                const salesByDate = {};
+                salesHistory.forEach(sale => {
+                    const date = new Date(sale.timestamp).toLocaleDateString();
+                    if (!salesByDate[date]) {
+                        salesByDate[date] = 0;
+                    }
+                    salesByDate[date] += sale.total;
+                });
+                
+                // Mettre à jour le graphique
+                salesChart.data.labels = Object.keys(salesByDate);
+                salesChart.data.datasets[0].data = Object.values(salesByDate);
+                salesChart.update();
+            }
+            
+            function updateStockChart() {
+                let totalSold = 0;
+                let totalStock = 0;
+                
+                for (const id in products) {
+                    const product = products[id];
+                    totalStock += product.quantity || 1;
+                    totalSold += product.sold || 0;
+                }
+                
+                stockChart.data.datasets[0].data = [totalSold, totalStock];
+                stockChart.update();
+            }
+            
+            function updateCategoryChart() {
+                const salesByCategory = {};
+                
+                for (const id in products) {
+                    const product = products[id];
+                    if (!salesByCategory[product.category]) {
+                        salesByCategory[product.category] = 0;
+                    }
+                    salesByCategory[product.category] += (product.sold || 0) * product.price;
+                }
+                
+                categoryChart.data.labels = Object.keys(salesByCategory);
+                categoryChart.data.datasets[0].data = Object.values(salesByCategory);
+                categoryChart.update();
+            }
+            
+            function updateCategoryStats() {
+                // Calculer les statistiques par catégorie
+                const statsByCategory = {};
+                
+                // Initialiser les catégories
+                const categories = ['électronique', 'vêtements', 'alimentation', 'maison', 'autre'];
+                categories.forEach(cat => {
+                    statsByCategory[cat] = {
+                        total: 0,
+                        sold: 0,
+                        stock: 0,
+                        revenue: 0
+                    };
+                });
+                
+                // Remplir les statistiques
+                for (const id in products) {
+                    const product = products[id];
+                    if (statsByCategory[product.category]) {
+                        statsByCategory[product.category].total += 1;
+                        statsByCategory[product.category].sold += product.sold || 0;
+                        statsByCategory[product.category].stock += product.quantity || 1;
+                        statsByCategory[product.category].revenue += (product.sold || 0) * product.price;
+                    }
+                }
+                
+                // Générer les cartes de statistiques
+                categoryStatsContainer.innerHTML = '';
+                
+                for (const category in statsByCategory) {
+                    const stats = statsByCategory[category];
+                    if (stats.total > 0) {
+                        const card = document.createElement('div');
+                        card.className = 'category-stat-card';
+                        card.innerHTML = `
+                            <h4>${category.charAt(0).toUpperCase() + category.slice(1)}</h4>
+                            <div class="value">${stats.sold} / ${stats.stock}</div>
+                            <div class="sub-value">Vendus / Stock</div>
+                            <div class="value">${stats.revenue.toLocaleString()} FCFA</div>
+                            <div class="sub-value">Chiffre d'affaires</div>
+                        `;
+                        categoryStatsContainer.appendChild(card);
+                    }
+                }
+                
+                if (categoryStatsContainer.children.length === 0) {
+                    categoryStatsContainer.innerHTML = '<p>Aucune donnée disponible par catégorie</p>';
+                }
+            }
+            
+            function updateDashboard() {
+                let totalSales = 0;
+                let totalItemsSold = 0;
+                let totalItemsStock = 0;
+                
+                for (const id in products) {
+                    const product = products[id];
+                    totalItemsStock += product.quantity || 1;
+                    totalItemsSold += product.sold || 0;
+                    totalSales += (product.sold || 0) * product.price;
+                }
+                
+                const salesRate = totalItemsStock > 0 ? 
+                    Math.round((totalItemsSold / totalItemsStock) * 100) : 0;
+                
+                document.getElementById('total-sales').textContent = totalSales.toLocaleString() + ' FCFA';
+                document.getElementById('total-items-sold').textContent = totalItemsSold;
+                document.getElementById('total-items-stock').textContent = totalItemsStock;
+                document.getElementById('sales-rate').textContent = salesRate + '%';
+            }
+            
+            function renderSalesJournal() {
+                if (salesHistory.length === 0) {
+                    noJournalEntriesMessage.style.display = 'block';
+                    return;
+                }
+                
+                noJournalEntriesMessage.style.display = 'none';
+                salesJournalContainer.innerHTML = '';
+                
+                // Afficher les 10 dernières ventes
+                const recentSales = salesHistory.slice(-10).reverse();
+                
+                recentSales.forEach(sale => {
+                    const entry = document.createElement('div');
+                    entry.className = 'journal-entry';
+                    
+                    const date = new Date(sale.timestamp);
+                    const timeString = date.toLocaleTimeString();
+                    const dateString = date.toLocaleDateString();
+                    
+                    entry.innerHTML = `
+                        <div class="journal-time">${dateString} ${timeString}</div>
+                        <div>${sale.items.length} article(s) - Total: <span class="journal-price">${sale.total.toLocaleString()} FCFA</span></div>
+                    `;
+                    
+                    salesJournalContainer.appendChild(entry);
+                });
+            }
+            
+            // Démarrer le scanner
+            async function startScanner() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { facingMode: "environment" } 
+                    });
+                    video.srcObject = stream;
+                    scannerActive = true;
+                    startScannerBtn.classList.add('hidden');
+                    stopScannerBtn.classList.remove('hidden');
+                    qrResult.textContent = "Recherche de QR code...";
+                    scanQRCode();
+                } catch (err) {
+                    console.error("Erreur d'accès à la caméra: ", err);
+                    qrResult.textContent = "Erreur: Impossible d'accéder à la caméra";
+                }
+            }
+            
+            // Arrêter le scanner
+            function stopScanner() {
+                scannerActive = false;
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                startScannerBtn.classList.remove('hidden');
+                stopScannerBtn.classList.add('hidden');
+                qrResult.textContent = "Scanner arrêté";
+            }
+            
+            // Fonction pour scanner le QR code
+            function scanQRCode() {
+                if (!scannerActive) return;
+                
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                
+                function tick() {
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        canvas.height = video.videoHeight;
+                        canvas.width = video.videoWidth;
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        
+                        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                        const code = jsQR(imageData.data, imageData.width, imageData.height);
+                        
+                        if (code) {
+                            processScannedCode(code.data);
+                        }
+                    }
+                    
+                    if (scannerActive) {
+                        requestAnimationFrame(tick);
+                    }
+                }
+                
+                tick();
+            }
+            
+            // Traiter le code scanné
+            function processScannedCode(code) {
+                try {
+                    const productData = JSON.parse(code);
+                    
+                    if (!products[productData.id]) {
+                        qrResult.textContent = "Produit non reconnu";
+                        return;
+                    }
+                    
+                    // Vérifier le stock
+                    const product = products[productData.id];
+                    if (product.quantity <= 0) {
+                        qrResult.textContent = "Stock épuisé pour: " + product.name;
+                        return;
+                    }
+                    
+                    // Vérifier si le produit est déjà dans la vente
+                    const existingItemIndex = saleItems.findIndex(item => item.id === productData.id);
+                    
+                    if (existingItemIndex >= 0) {
+                        // Vérifier si on peut ajouter un autre exemplaire
+                        if (saleItems[existingItemIndex].quantity >= product.quantity) {
+                            qrResult.textContent = "Stock insuffisant pour: " + product.name;
+                            return;
+                        }
+                        
+                        // Incrémenter la quantité
+                        saleItems[existingItemIndex].quantity += 1;
+                    } else {
+                        // Ajouter le produit à la vente
+                        saleItems.push({
+                            id: productData.id,
+                            name: productData.name,
+                            price: productData.price,
+                            category: productData.category,
+                            week: productData.week,
+                            quantity: 1
+                        });
+                    }
+                    
+                    updateSaleDisplay();
+                    qrResult.textContent = `Ajouté: ${productData.name}`;
+                } catch (e) {
+                    qrResult.textContent = "QR code non reconnu";
+                }
+            }
+            
+            // Mettre à jour l'affichage des ventes
+            function updateSaleDisplay() {
+                if (saleItems.length === 0) {
+                    noItemsMessage.style.display = 'block';
+                    saleTotalElement.textContent = "Total: 0 FCFA";
+                    return;
+                }
+                
+                noItemsMessage.style.display = 'none';
+                saleItemsContainer.innerHTML = '';
+                
+                totalAmount = 0;
+                
+                saleItems.forEach(item => {
+                    const itemTotal = item.price * item.quantity;
+                    totalAmount += itemTotal;
+                    
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'sale-item';
+                    itemElement.innerHTML = `
+                        <span>${item.name} x${item.quantity}</span>
+                        <span>${itemTotal.toLocaleString()} FCFA</span>
+                    `;
+                    
+                    saleItemsContainer.appendChild(itemElement);
+                });
+                
+                saleTotalElement.textContent = `Total: ${totalAmount.toLocaleString()} FCFA`;
+            }
+            
+            // Générer un QR code
+            function generateQrCode() {
+                if (!isAuthenticated) {
+                    alert("Veuillez vous authentifier pour ajouter des articles");
+                    showAuth();
+                    return;
+                }
+                
+                const name = document.getElementById('product-name').value;
+                const price = parseInt(document.getElementById('product-price').value);
+                const quantity = parseInt(document.getElementById('product-quantity').value);
+                const category = document.getElementById('product-category').value;
+                const week = document.getElementById('product-week').value;
+                
+                if (!name || !price || !quantity) {
+                    alert("Veuillez remplir tous les champs");
+                    return;
+                }
+                
+                // Générer un ID unique
+                const id = Date.now().toString();
+                
+                // Créer l'objet produit
+                const productData = {
+                    id: id,
+                    name: name,
+                    price: price,
+                    quantity: quantity,
+                    category: category,
+                    week: week,
+                    sold: 0
+                };
+                
+                // Sauvegarder le produit
+                products[id] = productData;
+                localStorage.setItem('products', JSON.stringify(products));
+                
+                // Générer le QR code
+                const qrCodeDiv = document.createElement('div');
+                qrCodeDiv.className = 'qr-card';
+                qrCodeDiv.dataset.category = category;
+                qrCodeDiv.dataset.week = week;
+                
+                QRCode.toDataURL(JSON.stringify(productData), { width: 150, margin: 1 }, function(err, url) {
+                    if (err) {
+                        console.error(err);
+                        return;
+                    }
+                    
+                    qrCodeDiv.innerHTML = `
+                        <img src="${url}" alt="QR Code">
+                        <p>${name}</p>
+                        <p class="price">${price.toLocaleString()} FCFA</p>
+                        <p>Stock: ${quantity}</p>
+                    `;
+                    
+                    if (noQrCodesMessage.style.display !== 'none') {
+                        noQrCodesMessage.style.display = 'none';
+                    }
+                    
+                    qrCodesContainer.appendChild(qrCodeDiv);
+                });
+                
+                // Réinitialiser le formulaire
+                document.getElementById('product-name').value = '';
+                document.getElementById('product-price').value = '';
+                document.getElementById('product-quantity').value = '1';
+                
+                // Mettre à jour les graphiques et le tableau de bord
+                updateDashboard();
+                updateAllCharts();
+                updateCategoryStats();
+            }
+            
+            // Afficher les QR codes avec filtres
+            function renderQrCodes() {
+                qrCodesContainer.innerHTML = '';
+                let hasProducts = false;
+                
+                for (const id in products) {
+                    const product = products[id];
+                    
+                    if ((currentCategoryFilter === 'all' || product.category === currentCategoryFilter) &&
+                        (currentWeekFilter === 'all' || product.week === currentWeekFilter)) {
+                        
+                        hasProducts = true;
+                        
+                        const qrCodeDiv = document.createElement('div');
+                        qrCodeDiv.className = 'qr-card';
+                        qrCodeDiv.dataset.category = product.category;
+                        qrCodeDiv.dataset.week = product.week;
+                        
+                        // Ajouter un badge si le produit est vendu
+                        if (product.quantity <= 0) {
+                            const soldBadge = document.createElement('div');
+                            soldBadge.className = 'sold-badge';
+                            soldBadge.innerHTML = 'Vendu';
+                            qrCodeDiv.appendChild(soldBadge);
+                        }
+                        
+                        QRCode.toDataURL(JSON.stringify(product), { width: 150, margin: 1 }, function(err, url) {
+                            if (err) {
+                                console.error(err);
+                                return;
+                            }
+                            
+                            qrCodeDiv.innerHTML += `
+                                <img src="${url}" alt="QR Code">
+                                <p>${product.name}</p>
+                                <p class="price">${product.price.toLocaleString()} FCFA</p>
+                                <p>Stock: ${product.quantity} | Vendus: ${product.sold || 0}</p>
+                            `;
+                            
+                            qrCodesContainer.appendChild(qrCodeDiv);
+                        });
+                    }
+                }
+                
+                if (!hasProducts) {
+                    noQrCodesMessage.style.display = 'block';
+                } else {
+                    noQrCodesMessage.style.display = 'none';
+                }
+            }
+            
+            // Imprimer tous les QR codes
+            function printAllQrCodes() {
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write(`
+                    <html>
+                    <head>
+                        <title>Imprimer tous les QR Codes</title>
+                        <style>
+                            body { font-family: Arial, sans-serif; }
+                            .qr-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; padding: 20px; }
+                            .qr-card { text-align: center; page-break-inside: avoid; }
+                            .qr-card img { max-width: 100%; }
+                            @media print {
+                                .qr-grid { grid-template-columns: repeat(4, 1fr); }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>QR Codes des Articles</h1>
+                        <div class="qr-grid">
+                `);
+                
+                for (const id in products) {
+                    const product = products[id];
+                    printWindow.document.write(`
+                        <div class="qr-card">
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(JSON.stringify(product))}&size=150x150" alt="QR Code">
+                            <p>${product.name}</p>
+                            <p>${product.price.toLocaleString()} FCFA</p>
+                            <p>Stock: ${product.quantity}</p>
+                        </div>
+                    `);
+                }
+                
+                printWindow.document.write(`
+                        </div>
+                    </body>
+                    </html>
+                `);
+                
+                printWindow.document.close();
+                printWindow.focus();
+                
+                // Attendre que les images soient chargées avant d'imprimer
+                setTimeout(() => {
+                    printWindow.print();
+                }, 1000);
+            }
+            
+            // Envoyer par WhatsApp
+            function sendWhatsApp() {
+                if (saleItems.length === 0) {
+                    alert("Aucun article à envoyer. Veuillez scanner au moins un produit.");
+                    return;
+                }
+                
+                let message = "📋 *RÉSUMÉ DE VENTE* 📋%0A%0A";
+                
+                saleItems.forEach(item => {
+                    message += `➡️ ${item.name} x${item.quantity} : ${(item.price * item.quantity).toLocaleString()} FCFA%0A`;
+                    
+                    // Mettre à jour le stock
+                    if (products[item.id]) {
+                        products[item.id].quantity -= item.quantity;
+                        products[item.id].sold = (products[item.id].sold || 0) + item.quantity;
+                        
+                        // Supprimer le QR code si le stock est épuisé
+                        if (products[item.id].quantity <= 0) {
+                            // Marquer le produit comme vendu (suppression visuelle)
+                            const qrCard = document.querySelector(`.qr-card[data-category="${products[item.id].category}"][data-week="${products[item.id].week}"]`);
+                            if (qrCard) {
+                                const soldBadge = document.createElement('div');
+                                soldBadge.className = 'sold-badge';
+                                soldBadge.innerHTML = 'Vendu';
+                                qrCard.appendChild(soldBadge);
+                            }
+                        }
+                    }
+                });
+                
+                message += `%0A✅ *TOTAL: ${totalAmount.toLocaleString()} FCFA*%0A`;
+                message += `%0A📅 Date: ${new Date().toLocaleDateString()}`;
+                
+                // Enregistrer l'historique des ventes
+                salesHistory.push({
+                    timestamp: Date.now(),
+                    items: [...saleItems],
+                    total: totalAmount
+                });
+                
+                // Sauvegarder les données
+                localStorage.setItem('products', JSON.stringify(products));
+                localStorage.setItem('salesHistory', JSON.stringify(salesHistory));
+                
+                const phoneNumber = "92871605";
+                const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
+                
+                window.open(whatsappUrl, '_blank');
+                
+                // Mettre à jour l'interface
+                updateDashboard();
+                updateAllCharts();
+                updateCategoryStats();
+                renderSalesJournal();
+                renderQrCodes();
+                
+                // Réinitialiser la vente après l'envoi
+                saleItems = [];
+                updateSaleDisplay();
+                qrResult.textContent = "Vente envoyée avec succès!";
+            }
+        });
+    </script>
+</body>
+</html>

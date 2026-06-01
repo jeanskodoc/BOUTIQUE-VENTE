@@ -1,0 +1,1697 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Commande en Ligne - Paiement Carte ESODI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --success: #2ecc71;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --whatsapp: #25D366;
+            --esodi: #8B0000;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 0;
+            font-size: 16px;
+            overflow-x: hidden;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--secondary), var(--primary));
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin-bottom: 8px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        
+        .description {
+            font-size: 14px;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .content {
+            padding: 20px 15px;
+            padding-bottom: 90px; /* Espace pour les boutons flottants */
+        }
+        
+        .section {
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .section:last-child {
+            border-bottom: none;
+        }
+        
+        h2 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+        }
+        
+        h2 i {
+            margin-right: 10px;
+            color: var(--primary);
+            font-size: 20px;
+            width: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 15px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 14px 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background-color: white;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+        
+        .btn-retour {
+            position: absolute;
+            top: 20px;
+            left: 15px;
+            padding: 8px 12px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+            z-index: 101;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+        }
+        
+        .btn-retour:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .gps-section {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .gps-info {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        
+        .gps-info i {
+            color: var(--primary);
+            margin-right: 10px;
+            font-size: 18px;
+            margin-top: 2px;
+        }
+        
+        .gps-coordinates {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .gps-field {
+            width: 100%;
+        }
+        
+        .gps-field label {
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .gps-field input {
+            background-color: #f0f0f0;
+            font-family: monospace;
+            font-size: 15px;
+        }
+        
+        .btn-gps {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 15px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            width: 100%;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        
+        .btn-gps:hover, .btn-gps:active {
+            background-color: #2980b9;
+        }
+        
+        .gps-status {
+            margin-top: 10px;
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        
+        .gps-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .gps-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .gps-loading {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        
+        .categories {
+            display: flex;
+            overflow-x: auto;
+            gap: 8px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+        
+        .categories::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .category-btn {
+            padding: 10px 16px;
+            background: var(--light);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .category-btn.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 360px) {
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+        
+        .product-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-card:active {
+            transform: scale(0.98);
+        }
+        
+        .product-card.selected {
+            border-color: var(--success);
+        }
+        
+        .product-image {
+            height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 40px;
+        }
+        
+        .electronique { background: linear-gradient(45deg, #3498db, #2c3e50); }
+        .vetements { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .alimentation { background: linear-gradient(45deg, #2ecc71, #27ae60); }
+        .maison { background: linear-gradient(45deg, #f39c12, #d35400); }
+        .sport { background: linear-gradient(45deg, #9b59b6, #8e44ad); }
+        
+        .product-info {
+            padding: 12px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .product-title {
+            font-weight: 700;
+            font-size: 16px;
+            margin-bottom: 6px;
+            color: var(--dark);
+            line-height: 1.3;
+        }
+        
+        .product-price {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        
+        .product-description {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 15px;
+            line-height: 1.4;
+            flex-grow: 1;
+        }
+        
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+        
+        .quantity-btn {
+            background: var(--light);
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+        }
+        
+        .quantity-btn:active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .quantity-input {
+            width: 45px;
+            text-align: center;
+            margin: 0 8px;
+            font-weight: bold;
+            font-size: 16px;
+            padding: 6px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        
+        .summary {
+            background: #f9f9f9;
+            padding: 18px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px dashed #ddd;
+            font-size: 15px;
+        }
+        
+        .summary-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--dark);
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #ddd;
+        }
+        
+        /* Boutons d'action flottants pour mobile */
+        .action-buttons-mobile {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 15px;
+            box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 1000;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-whatsapp {
+            background: var(--whatsapp);
+            color: white;
+        }
+        
+        .btn-esodi {
+            background: var(--esodi);
+            color: white;
+        }
+        
+        .payment-info {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid var(--warning);
+        }
+        
+        .payment-info p {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        
+        .payment-info ul {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+        
+        .payment-info li {
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        
+        .payment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .modal-header {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .modal-btn {
+            padding: 16px;
+            border: none;
+            border-radius: 10px;
+            font-size: 17px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s;
+            text-decoration: none;
+        }
+        
+        .modal-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .modal-btn-esodi {
+            background: var(--esodi);
+            color: white;
+        }
+        
+        .modal-btn-cancel {
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .esodi-info {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f7ff;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .esodi-info p {
+            margin-bottom: 10px;
+            font-size: 15px;
+        }
+        
+        .esodi-link {
+            display: inline-block;
+            background: var(--esodi);
+            color: white;
+            padding: 14px 25px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 10px;
+            transition: background 0.3s;
+            font-size: 16px;
+            width: 100%;
+            text-align: center;
+        }
+        
+        .esodi-link:active {
+            background: #6a0000;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px 15px;
+            background: var(--light);
+            color: var(--dark);
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        /* STYLE CORRIGÉ POUR LA CHECKBOX */
+        .checkbox-container {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: border-color 0.3s;
+        }
+        
+        .checkbox-container:focus-within {
+            border-color: var(--primary);
+        }
+        
+        .checkbox-container input[type="checkbox"] {
+            width: 24px;
+            height: 24px;
+            margin-right: 15px;
+            margin-top: 2px;
+            flex-shrink: 0;
+            cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: white;
+            border: 2px solid #adb5bd;
+            border-radius: 6px;
+            position: relative;
+            transition: all 0.2s;
+        }
+        
+        .checkbox-container input[type="checkbox"]:checked {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .checkbox-container input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .checkbox-container input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+        
+        .checkbox-container label {
+            font-weight: normal;
+            margin-bottom: 0;
+            font-size: 15px;
+            line-height: 1.5;
+            cursor: pointer;
+            user-select: none;
+            color: #495057;
+            flex: 1;
+        }
+        
+        .checkbox-container label strong {
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .checkbox-error {
+            border-color: var(--danger) !important;
+            background-color: #fff5f5;
+        }
+        
+        .checkbox-error-message {
+            color: var(--danger);
+            font-size: 14px;
+            margin-top: 8px;
+            display: none;
+            padding-left: 39px;
+        }
+        
+        .checkbox-error-message.show {
+            display: block;
+        }
+        
+        .currency {
+            font-size: 0.9em;
+            margin-left: 2px;
+        }
+        
+        .payment-steps {
+            text-align: left;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        
+        .payment-steps ol {
+            padding-left: 20px;
+        }
+        
+        .payment-steps li {
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+        
+        .esodi-qr {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .esodi-qr img {
+            max-width: 200px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            background: white;
+        }
+        
+        .qr-placeholder {
+            width: 180px;
+            height: 180px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            border-radius: 8px;
+        }
+        
+        .qr-placeholder i {
+            font-size: 60px;
+            color: #666;
+        }
+        
+        /* Améliorations pour les inputs sur mobile */
+        input[type="number"] {
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+        
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        /* Toast notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--dark);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 3000;
+            transition: transform 0.3s ease;
+            max-width: 90%;
+            text-align: center;
+            font-weight: 500;
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        /* Améliorations pour le défilement tactile */
+        * {
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        /* Pour éviter le zoom sur les inputs iOS */
+        @media screen and (max-width: 767px) {
+            input, select, textarea {
+                font-size: 16px !important;
+            }
+        }
+        
+        /* Header fixe amélioré */
+        .header-content {
+            position: relative;
+            padding-top: 10px;
+        }
+        
+        /* Animation pour les boutons */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        /* Lien pour les conditions générales */
+        .conditions-link {
+            color: var(--primary);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 600;
+        }
+        
+        .conditions-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 2001;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .conditions-content {
+            background: white;
+            padding: 25px 20px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .conditions-content h3 {
+            color: var(--secondary);
+            margin-bottom: 15px;
+            font-size: 20px;
+        }
+        
+        .conditions-content p {
+            margin-bottom: 15px;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+        
+        .conditions-content ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .conditions-content li {
+            margin-bottom: 10px;
+            font-size: 14px;
+        }
+        
+        .close-conditions {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+    </style>
+</head>
+    
+<body>
+    <div class="container">
+        <header>
+            <button class="btn-retour" onclick="history.back()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="header-content">
+                <h1><i class="fas fa-store"></i> Commande en Ligne</h1>
+                <p class="description">Commandez et payez par carte ESODI</p>
+            </div>
+        </header>
+        
+        <div class="content">
+            <div class="section">
+                <h2><i class="fas fa-user"></i> Informations Personnelles</h2>
+                <div class="form-group">
+                    <label for="nom">Nom et Prénom *</label>
+                    <input type="text" id="nom" placeholder="Votre nom complet" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="whatsapp">Numéro WhatsApp *</label>
+                    <input type="tel" id="whatsapp" placeholder="Votre numéro WhatsApp" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adresse">Adresse de Livraison *</label>
+                    <textarea id="adresse" rows="3" placeholder="Votre adresse complète pour la livraison" required></textarea>
+                </div>
+                
+                <div class="gps-section">
+                    <div class="gps-info">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <h3 style="margin: 0 0 5px 0; font-size: 16px;">Coordonnées GPS</h3>
+                            <p style="font-size: 14px; opacity: 0.8;">Cliquez pour détecter automatiquement votre position</p>
+                        </div>
+                    </div>
+                    
+                    <button class="btn-gps" id="get-gps-btn">
+                        <i class="fas fa-crosshairs"></i> Obtenir mes coordonnées GPS
+                    </button>
+                    
+                    <div id="gps-status" class="gps-status" style="display: none;"></div>
+                    
+                    <div class="gps-coordinates">
+                        <div class="gps-field">
+                            <label for="latitude">Latitude</label>
+                            <input type="text" id="latitude" placeholder="Latitude" readonly>
+                        </div>
+                        <div class="gps-field">
+                            <label for="longitude">Longitude</label>
+                            <input type="text" id="longitude" placeholder="Longitude" readonly>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-shopping-cart"></i> Sélection des Articles</h2>
+                <p style="margin-bottom: 15px; font-size: 15px;">Choisissez une catégorie :</p>
+                
+                <div class="categories">
+                    <button class="category-btn active" data-category="all">Tous</button>
+                    <button class="category-btn" data-category="electronique">Électronique</button>
+                    <button class="category-btn" data-category="vetements">Vêtements</button>
+                    <button class="category-btn" data-category="alimentation">Alimentation</button>
+                    <button class="category-btn" data-category="maison">Maison</button>
+                    <button class="category-btn" data-category="sport">Sport</button>
+                </div>
+                
+                <div class="product-grid">
+                    <div class="product-card" data-id="1" data-name="Smartphone XYZ" data-price="65000" data-category="electronique">
+                        <div class="product-image electronique">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">Smartphone XYZ</div>
+                            <div class="product-price">65 000 <span class="currency">FCFA</span></div>
+                            <div class="product-description">Smartphone haut de gamme avec appareil photo 48MP, 128GB de stockage.</div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" max="10">
+                                <button class="quantity-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" data-id="2" data-name="Écouteurs Sans Fil" data-price="25000" data-category="electronique">
+                        <div class="product-image electronique">
+                            <i class="fas fa-headphones"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">Écouteurs Sans Fil</div>
+                            <div class="product-price">25 000 <span class="currency">FCFA</span></div>
+                            <div class="product-description">Écouteurs Bluetooth avec réduction de bruit et autonomie de 24h.</div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" max="10">
+                                <button class="quantity-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" data-id="3" data-name="T-shirt Sport" data-price="12000" data-category="vetements">
+                        <div class="product-image vetements">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">T-shirt Sport</div>
+                            <div class="product-price">12 000 <span class="currency">FCFA</span></div>
+                            <div class="product-description">T-shirt 100% coton, confortable pour le sport et les loisirs.</div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" max="10">
+                                <button class="quantity-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" data-id="4" data-name="Panier de Fruits" data-price="8000" data-category="alimentation">
+                        <div class="product-image alimentation">
+                            <i class="fas fa-apple-alt"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">Panier de Fruits</div>
+                            <div class="product-price">8 000 <span class="currency">FCFA</span></div>
+                            <div class="product-description">Assortiment de fruits frais de saison, parfait pour une alimentation saine.</div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" max="10">
+                                <button class="quantity-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" data-id="5" data-name="Lampe de Bureau" data-price="18000" data-category="maison">
+                        <div class="product-image maison">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">Lampe de Bureau</div>
+                            <div class="product-price">18 000 <span class="currency">FCFA</span></div>
+                            <div class="product-description">Lampe LED moderne avec variateur d'intensité, parfaite pour le bureau.</div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" max="10">
+                                <button class="quantity-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="product-card" data-id="6" data-name="Ballon de Football" data-price="15000" data-category="sport">
+                        <div class="product-image sport">
+                            <i class="fas fa-basketball-ball"></i>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-title">Ballon de Football</div>
+                            <div class="product-price">15 000 <span class="currency">FCFA</span></div>
+                            <div class="product-description">Ballon de football officiel taille 5, idéal pour matchs et entraînements.</div>
+                            <div class="quantity-control">
+                                <button class="quantity-btn minus">-</button>
+                                <input type="number" class="quantity-input" value="0" min="0" max="10">
+                                <button class="quantity-btn plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-file-invoice"></i> Récapitulatif de Commande</h2>
+                <div class="summary">
+                    <div class="summary-item">
+                        <span>Articles sélectionnés:</span>
+                        <span id="articles-count">0</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Sous-total:</span>
+                        <span id="subtotal">0 <span class="currency">FCFA</span></span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Frais de livraison:</span>
+                        <span>2 000 <span class="currency">FCFA</span></span>
+                    </div>
+                    <div class="summary-total">
+                        <span>Total:</span>
+                        <span id="total">2 000 <span class="currency">FCFA</span></span>
+                    </div>
+                </div>
+                
+                <div class="payment-info">
+                    <p><strong>Option de paiement:</strong></p>
+                    <ul>
+                        <li><strong>Carte ESODI:</strong> Utilisez votre carte virtuelle ESODI pour effectuer le paiement en toute sécurité.</li>
+                    </ul>
+                    <p>Votre commande sera traitée dès réception du paiement.</p>
+                    
+                    <div class="esodi-info">
+                        <p>Accédez au portail de paiement ESODI pour compléter votre transaction</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <h2><i class="fas fa-paper-plane"></i> Envoyer la Commande</h2>
+                
+                <!-- CHECKBOX CORRIGÉE -->
+                <div class="checkbox-container" id="checkbox-container">
+                    <input type="checkbox" id="confirm" name="confirm" required>
+                    <label for="confirm">
+                        Je confirme que les informations ci-dessus sont correctes et j'accepte les 
+                        <span class="conditions-link" id="conditions-link">conditions générales</span>
+                    </label>
+                </div>
+                <div class="checkbox-error-message" id="checkbox-error">
+                    Vous devez accepter les conditions générales pour continuer
+                </div>
+                
+                <!-- Boutons d'action seront dans la section flottante -->
+            </div>
+        </div>
+        
+        <!-- Boutons d'action flottants pour mobile -->
+        <div class="action-buttons-mobile">
+            <button class="btn btn-whatsapp" id="whatsapp-btn">
+                <i class="fab fa-whatsapp"></i> Envoyer par WhatsApp
+            </button>
+            
+            <button class="btn btn-esodi btn-pulse" id="esodi-btn">
+                <i class="fas fa-credit-card"></i> Payer avec ESODI
+            </button>
+        </div>
+        
+        <footer>
+            <p>© 2023 - Service Client: 92 87 16 05 | Livraison sous 24-48h</p>
+            <p style="margin-top: 10px; font-size: 13px; opacity: 0.8;">Optimisé pour mobile</p>
+        </footer>
+    </div>
+
+    <!-- Modal de Paiement ESODI -->
+    <div class="payment-modal" id="payment-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-credit-card"></i> Paiement par Carte ESODI
+            </div>
+            
+            <p style="font-size: 18px; margin: 15px 0;">Montant à payer: <strong id="modal-amount">0 FCFA</strong></p>
+            
+            <div class="esodi-qr">
+                <p style="margin-bottom: 15px; font-size: 15px;">Scannez le QR code pour payer ou cliquez sur le lien ci-dessous:</p>
+                <div class="qr-placeholder">
+                    <i class="fas fa-qrcode"></i>
+                </div>
+                <p style="margin-top: 10px; font-size: 14px; color: #666;">QR Code vers le portail ESODI</p>
+            </div>
+            
+            <div class="payment-steps">
+                <p><strong>Instructions de paiement:</strong></p>
+                <ol>
+                    <li>Cliquez sur "Accéder au portail ESODI" ci-dessous</li>
+                    <li>Entrez les détails de votre carte virtuelle</li>
+                    <li>Saisissez le montant indiqué</li>
+                    <li>Confirmez la transaction sécurisée</li>
+                    <li>Revenez sur cette page après paiement</li>
+                </ol>
+            </div>
+            
+            <div class="modal-buttons">
+                <a href="https://jeanskodoc.github.io/-CONOMIE-/" class="modal-btn modal-btn-esodi" id="esodi-modal-btn" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> Accéder au portail ESODI
+                </a>
+                
+                <button class="modal-btn modal-btn-cancel" id="cancel-btn">
+                    <i class="fas fa-times"></i> Annuler
+                </button>
+            </div>
+            
+            <div style="margin-top: 15px; padding: 12px; background: #f8f9fa; border-radius: 8px; font-size: 14px; text-align: left;">
+                <p style="margin: 0;"><i class="fas fa-info-circle" style="color: var(--primary);"></i> Après paiement, votre commande sera automatiquement enregistrée.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal des Conditions Générales -->
+    <div class="conditions-modal" id="conditions-modal">
+        <div class="conditions-content">
+            <h3>Conditions Générales d'Utilisation</h3>
+            
+            <p>En utilisant ce service de commande en ligne, vous acceptez les conditions suivantes :</p>
+            
+            <ul>
+                <li>Les informations personnelles fournies doivent être exactes et complètes.</li>
+                <li>Les commandes sont traitées dans un délai de 24 à 48 heures.</li>
+                <li>Les frais de livraison sont fixés à 2 000 FCFA pour toutes les commandes.</li>
+                <li>Le paiement doit être effectué avant la préparation de la commande.</li>
+                <li>En cas de retard de livraison, vous serez informé par WhatsApp.</li>
+                <li>Les retours sont acceptés sous 7 jours pour les articles non ouverts.</li>
+                <li>Les produits électroniques bénéficient d'une garantie de 3 mois.</li>
+                <li>Les produits alimentaires ne peuvent être retournés pour des raisons d'hygiène.</li>
+            </ul>
+            
+            <p>Pour toute question concernant votre commande, contactez notre service client au 92 87 16 05.</p>
+            
+            <button class="close-conditions" id="close-conditions">J'ai compris</button>
+        </div>
+    </div>
+
+    <!-- Toast notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Éléments du modal
+            const paymentModal = document.getElementById('payment-modal');
+            const modalAmount = document.getElementById('modal-amount');
+            const esodiModalBtn = document.getElementById('esodi-modal-btn');
+            const cancelBtn = document.getElementById('cancel-btn');
+            const toast = document.getElementById('toast');
+            
+            // Éléments de la checkbox
+            const checkbox = document.getElementById('confirm');
+            const checkboxContainer = document.getElementById('checkbox-container');
+            const checkboxError = document.getElementById('checkbox-error');
+            const conditionsLink = document.getElementById('conditions-link');
+            const conditionsModal = document.getElementById('conditions-modal');
+            const closeConditions = document.getElementById('close-conditions');
+            
+            // Éléments GPS
+            const getGpsBtn = document.getElementById('get-gps-btn');
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            const gpsStatus = document.getElementById('gps-status');
+            
+            // Gestion des catégories
+            const categoryButtons = document.querySelectorAll('.category-btn');
+            const productCards = document.querySelectorAll('.product-card');
+            
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    
+                    // Mettre à jour les boutons de catégorie
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Filtrer les produits
+                    productCards.forEach(card => {
+                        if (category === 'all' || card.dataset.category === category) {
+                            card.style.display = 'flex';
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+                    
+                    // Feedback tactile
+                    this.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 150);
+                });
+            });
+            
+            // Gestion de la checkbox
+            checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    checkboxContainer.classList.remove('checkbox-error');
+                    checkboxError.classList.remove('show');
+                } else {
+                    checkboxContainer.classList.add('checkbox-error');
+                    checkboxError.classList.add('show');
+                }
+            });
+            
+            // Clic sur le lien des conditions générales
+            conditionsLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                conditionsModal.style.display = 'flex';
+            });
+            
+            // Fermer le modal des conditions
+            closeConditions.addEventListener('click', function() {
+                conditionsModal.style.display = 'none';
+            });
+            
+            // Fermer le modal en cliquant à l'extérieur
+            conditionsModal.addEventListener('click', function(event) {
+                if (event.target === conditionsModal) {
+                    conditionsModal.style.display = 'none';
+                }
+            });
+            
+            // Gestion des quantités
+            const quantityControls = document.querySelectorAll('.quantity-control');
+            
+            quantityControls.forEach(control => {
+                const minusBtn = control.querySelector('.minus');
+                const plusBtn = control.querySelector('.plus');
+                const input = control.querySelector('.quantity-input');
+                const card = control.closest('.product-card');
+                
+                minusBtn.addEventListener('click', () => {
+                    if (parseInt(input.value) > 0) {
+                        input.value = parseInt(input.value) - 1;
+                        updateSummary();
+                        showToast('Quantité mise à jour', 'success');
+                        
+                        // Feedback tactile
+                        minusBtn.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            minusBtn.style.transform = 'scale(1)';
+                        }, 150);
+                    }
+                });
+                
+                plusBtn.addEventListener('click', () => {
+                    if (parseInt(input.value) < 10) {
+                        input.value = parseInt(input.value) + 1;
+                        updateSummary();
+                        showToast('Quantité mise à jour', 'success');
+                        
+                        // Feedback tactile
+                        plusBtn.style.transform = 'scale(0.9)';
+                        setTimeout(() => {
+                            plusBtn.style.transform = 'scale(1)';
+                        }, 150);
+                        
+                        // Animation sur la carte produit
+                        card.style.boxShadow = '0 5px 15px rgba(52, 152, 219, 0.3)';
+                        setTimeout(() => {
+                            card.style.boxShadow = '';
+                        }, 300);
+                    } else {
+                        showToast('Quantité maximum atteinte', 'warning');
+                    }
+                });
+                
+                input.addEventListener('change', () => {
+                    if (parseInt(input.value) < 0) input.value = 0;
+                    if (parseInt(input.value) > 10) input.value = 10;
+                    updateSummary();
+                });
+                
+                // Gestion du tap sur mobile
+                let tapCount = 0;
+                let tapTimer;
+                
+                minusBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    tapCount++;
+                    if (tapCount === 1) {
+                        tapTimer = setTimeout(() => {
+                            tapCount = 0;
+                            minusBtn.click();
+                        }, 300);
+                    } else {
+                        clearTimeout(tapTimer);
+                        tapCount = 0;
+                        minusBtn.click();
+                    }
+                }, { passive: false });
+                
+                plusBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    tapCount++;
+                    if (tapCount === 1) {
+                        tapTimer = setTimeout(() => {
+                            tapCount = 0;
+                            plusBtn.click();
+                        }, 300);
+                    } else {
+                        clearTimeout(tapTimer);
+                        tapCount = 0;
+                        plusBtn.click();
+                    }
+                }, { passive: false });
+            });
+            
+            // Mise à jour du récapitulatif
+            function updateSummary() {
+                let totalArticles = 0;
+                let subtotal = 0;
+                
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const quantity = parseInt(card.querySelector('.quantity-input').value);
+                    const price = parseInt(card.dataset.price);
+                    
+                    if (quantity > 0) {
+                        totalArticles += quantity;
+                        subtotal += quantity * price;
+                    }
+                });
+                
+                const deliveryFee = 2000;
+                const total = subtotal + deliveryFee;
+                
+                document.getElementById('articles-count').textContent = totalArticles;
+                document.getElementById('subtotal').textContent = formatPrice(subtotal) + ' FCFA';
+                document.getElementById('total').textContent = formatPrice(total) + ' FCFA';
+            }
+            
+            // Formater le prix avec séparateurs de milliers
+            function formatPrice(price) {
+                return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+            }
+            
+            // Récupération des coordonnées GPS
+            getGpsBtn.addEventListener('click', function() {
+                // Afficher le statut de chargement
+                gpsStatus.textContent = "Localisation en cours...";
+                gpsStatus.className = "gps-status gps-loading";
+                gpsStatus.style.display = "block";
+                
+                // Animation du bouton
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+                
+                // Vérifier si le navigateur supporte la géolocalisation
+                if (!navigator.geolocation) {
+                    gpsStatus.textContent = "La géolocalisation n'est pas supportée par votre navigateur.";
+                    gpsStatus.className = "gps-status gps-error";
+                    showToast('Géolocalisation non supportée', 'error');
+                    return;
+                }
+                
+                // Obtenir la position
+                navigator.geolocation.getCurrentPosition(
+                    // Succès
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        
+                        // Remplir les champs avec les coordonnées
+                        latitudeInput.value = lat.toFixed(6);
+                        longitudeInput.value = lng.toFixed(6);
+                        
+                        // Afficher le statut de succès
+                        gpsStatus.textContent = "Position détectée avec succès!";
+                        gpsStatus.className = "gps-status gps-success";
+                        
+                        // Optionnel: Remplir automatiquement l'adresse avec les coordonnées
+                        const adresse = document.getElementById('adresse');
+                        if (!adresse.value.includes('Coordonnées GPS:')) {
+                            adresse.value += ` (Coordonnées GPS: ${lat.toFixed(6)}, ${lng.toFixed(6)})`;
+                        }
+                        
+                        showToast('Position détectée avec succès', 'success');
+                    },
+                    // Erreur
+                    function(error) {
+                        let errorMessage = "Erreur lors de la localisation: ";
+                        
+                        switch(error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = "Vous avez refusé l'accès à votre position. Veuillez autoriser la géolocalisation dans les paramètres de votre navigateur.";
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = "Les informations de localisation ne sont pas disponibles.";
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = "La demande de localisation a expiré.";
+                                break;
+                            default:
+                                errorMessage = "Une erreur inconnue s'est produite.";
+                                break;
+                        }
+                        
+                        gpsStatus.textContent = errorMessage;
+                        gpsStatus.className = "gps-status gps-error";
+                        showToast('Erreur de géolocalisation', 'error');
+                    },
+                    // Options
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 15000,
+                        maximumAge: 60000
+                    }
+                );
+            });
+            
+            // Bouton WhatsApp
+            document.getElementById('whatsapp-btn').addEventListener('click', function() {
+                // Vérifier la checkbox
+                if (!checkbox.checked) {
+                    checkboxContainer.classList.add('checkbox-error');
+                    checkboxError.classList.add('show');
+                    showToast('Veuillez accepter les conditions générales', 'warning');
+                    
+                    // Animation de la checkbox
+                    checkboxContainer.style.transform = 'translateX(-5px)';
+                    setTimeout(() => {
+                        checkboxContainer.style.transform = 'translateX(5px)';
+                    }, 100);
+                    setTimeout(() => {
+                        checkboxContainer.style.transform = 'translateX(0)';
+                    }, 200);
+                    
+                    return;
+                }
+                
+                const nom = document.getElementById('nom').value.trim();
+                const whatsapp = document.getElementById('whatsapp').value.trim();
+                const adresse = document.getElementById('adresse').value.trim();
+                const latitude = latitudeInput.value.trim();
+                const longitude = longitudeInput.value.trim();
+                
+                if (!nom || !whatsapp || !adresse) {
+                    showToast('Veuillez remplir tous les champs obligatoires', 'warning');
+                    return;
+                }
+                
+                // Validation du numéro WhatsApp
+                if (!/^[0-9+\-\s]{8,15}$/.test(whatsapp)) {
+                    showToast('Veuillez entrer un numéro WhatsApp valide', 'warning');
+                    return;
+                }
+                
+                let message = `Bonjour, je souhaite passer une commande.%0A%0A`;
+                message += `*Nom:* ${nom}%0A`;
+                message += `*WhatsApp:* ${whatsapp}%0A`;
+                message += `*Adresse:* ${adresse}%0A`;
+                
+                // Ajouter les coordonnées GPS si disponibles
+                if (latitude && longitude) {
+                    message += `*Coordonnées GPS:* ${latitude}, ${longitude}%0A`;
+                }
+                
+                message += `%0A*Détails de la commande:*%0A`;
+                
+                let hasItems = false;
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const quantity = parseInt(card.querySelector('.quantity-input').value);
+                    if (quantity > 0) {
+                        hasItems = true;
+                        const price = parseInt(card.dataset.price) * quantity;
+                        message += `- ${card.dataset.name} (x${quantity}) - ${formatPrice(price)} FCFA%0A`;
+                    }
+                });
+                
+                if (!hasItems) {
+                    showToast('Veuillez sélectionner au moins un article', 'warning');
+                    return;
+                }
+                
+                message += `%0A*Total:* ${document.getElementById('total').textContent}%0A%0A`;
+                message += `*Méthode de paiement:* Carte ESODI%0A`;
+                message += `*Conditions acceptées:* Oui%0A`;
+                message += `Merci de confirmer ma commande.`;
+                
+                // Animation du bouton
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+                
+                // Ouvrir WhatsApp
+                window.open(`https://wa.me/22892871605?text=${message}`, '_blank');
+                showToast('Ouverture de WhatsApp...', 'success');
+            });
+            
+            // Bouton ESODI
+            document.getElementById('esodi-btn').addEventListener('click', function() {
+                if (!validateForm()) return;
+                
+                const total = document.getElementById('total').textContent;
+                modalAmount.textContent = total;
+                paymentModal.style.display = 'flex';
+                
+                // Animation du bouton
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // Annuler le paiement
+            cancelBtn.addEventListener('click', function() {
+                paymentModal.style.display = 'none';
+                showToast('Paiement annulé', 'info');
+                
+                // Animation du bouton
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1)';
+                }, 150);
+            });
+            
+            // Fermer le modal en cliquant à l'extérieur
+            paymentModal.addEventListener('click', function(event) {
+                if (event.target === paymentModal) {
+                    paymentModal.style.display = 'none';
+                }
+            });
+            
+            // Valider le formulaire
+            function validateForm() {
+                // Vérifier la checkbox
+                if (!checkbox.checked) {
+                    checkboxContainer.classList.add('checkbox-error');
+                    checkboxError.classList.add('show');
+                    showToast('Veuillez accepter les conditions générales', 'warning');
+                    
+                    // Animation de la checkbox
+                    checkboxContainer.style.transform = 'translateX(-5px)';
+                    setTimeout(() => {
+                        checkboxContainer.style.transform = 'translateX(5px)';
+                    }, 100);
+                    setTimeout(() => {
+                        checkboxContainer.style.transform = 'translateX(0)';
+                    }, 200);
+                    
+                    return false;
+                }
+                
+                const nom = document.getElementById('nom').value.trim();
+                const whatsapp = document.getElementById('whatsapp').value.trim();
+                const adresse = document.getElementById('adresse').value.trim();
+                
+                if (!nom || !whatsapp || !adresse) {
+                    showToast('Veuillez remplir tous les champs obligatoires', 'warning');
+                    return false;
+                }
+                
+                // Validation du numéro WhatsApp
+                if (!/^[0-9+\-\s]{8,15}$/.test(whatsapp)) {
+                    showToast('Veuillez entrer un numéro WhatsApp valide', 'warning');
+                    return false;
+                }
+                
+                let hasItems = false;
+                document.querySelectorAll('.product-card').forEach(card => {
+                    const quantity = parseInt(card.querySelector('.quantity-input').value);
+                    if (quantity > 0) hasItems = true;
+                });
+                
+                if (!hasItems) {
+                    showToast('Veuillez sélectionner au moins un article', 'warning');
+                    return false;
+                }
+                
+                return true;
+            }
+            
+            // Obtenir le montant total sans le texte "FCFA"
+            function getTotalAmount() {
+                const totalText = document.getElementById('total').textContent;
+                return totalText.replace(/\sFCFA/, '').replace(/\s/g, '');
+            }
+            
+            // Fonction pour afficher les toast notifications
+            function showToast(message, type = 'info') {
+                toast.textContent = message;
+                toast.className = 'toast show';
+                
+                // Style selon le type
+                switch(type) {
+                    case 'success':
+                        toast.style.background = 'var(--success)';
+                        break;
+                    case 'error':
+                        toast.style.background = 'var(--danger)';
+                        break;
+                    case 'warning':
+                        toast.style.background = 'var(--warning)';
+                        break;
+                    default:
+                        toast.style.background = 'var(--dark)';
+                }
+                
+                // Masquer après 3 secondes
+                setTimeout(() => {
+                    toast.className = 'toast';
+                }, 3000);
+            }
+            
+            // Empêcher le zoom sur les inputs iOS
+            document.addEventListener('touchstart', function(event) {
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA' || event.target.tagName === 'SELECT') {
+                    // Rien à faire - laisser le comportement par défaut
+                }
+            }, { passive: true });
+            
+            // Gestion du clavier mobile
+            document.addEventListener('focusin', function(event) {
+                if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+                    // Faire défiler l'élément en vue
+                    setTimeout(() => {
+                        event.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }, 300);
+                }
+            });
+            
+            // Initialiser le récapitulatif
+            updateSummary();
+            
+            // Détecter si l'appareil est mobile
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            if (isMobile) {
+                document.body.classList.add('mobile-device');
+                showToast('Interface optimisée pour mobile', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

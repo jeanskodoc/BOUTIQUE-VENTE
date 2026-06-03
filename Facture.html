@@ -1,0 +1,2888 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionnaire de Factures Sécurisées</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-dark: #45a049;
+            --secondary-color: #6c757d;
+            --danger-color: #f44336;
+            --success-color: #25D366;
+            --warning-color: #ff9800;
+            --light-bg: #f8f9fa;
+            --dark-text: #333;
+            --medium-text: #555;
+            --light-text: #777;
+            --border-color: #ddd;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --radius: 8px;
+        }
+        
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--dark-text);
+            padding: 10px;
+        }
+        
+        /* Écran de connexion */
+        .login-container {
+            background: white;
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 450px;
+            text-align: center;
+        }
+        
+        .login-container h1 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-form .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+        
+        .login-form label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--medium-text);
+        }
+        
+        .login-form input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 16px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        .login-form input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        
+        .login-button {
+            width: 100%;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .login-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .error-message {
+            color: var(--danger-color);
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        /* Application principale */
+        .app-container {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            margin: 15px auto;
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--primary-color);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .app-header h1 {
+            margin: 0;
+            color: var(--dark-text);
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .header-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .logout-button {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .logout-button:hover {
+            background-color: #d32f2f;
+        }
+        
+        .backup-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .backup-button:hover {
+            background-color: #5a6268;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
+            gap: 5px;
+            overflow-x: auto;
+        }
+        
+        .tab {
+            padding: 10px 18px;
+            cursor: pointer;
+            background-color: var(--light-bg);
+            border-radius: var(--radius) var(--radius) 0 0;
+            white-space: nowrap;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        .tab:hover {
+            background-color: #e9ecef;
+        }
+        
+        .tab.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .form-section, .invoice-preview, .history-section, .sales-analysis-section, .verify-section {
+            margin-bottom: 25px;
+        }
+        
+        .form-section h2, .invoice-preview h2, .history-section h2, .sales-analysis-section h2, .verify-section h2 {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 20px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+            gap: 12px;
+        }
+        
+        .form-group {
+            flex: 1 1 300px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: var(--medium-text);
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            font-size: 15px;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.2);
+        }
+        
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: 600;
+            margin-right: 8px;
+            margin-bottom: 8px;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+        
+        button.whatsapp {
+            background-color: var(--success-color);
+        }
+        
+        button.whatsapp:hover {
+            background-color: #1da851;
+        }
+        
+        button.secondary {
+            background-color: var(--secondary-color);
+        }
+        
+        button.secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        button.analysis {
+            background-color: var(--warning-color);
+        }
+        
+        button.analysis:hover {
+            background-color: #e68900;
+        }
+        
+        button.reset {
+            background-color: #9C27B0;
+        }
+        
+        button.reset:hover {
+            background-color: #7B1FA2;
+        }
+        
+        button.export {
+            background-color: #2196F3;
+        }
+        
+        button.export:hover {
+            background-color: #0b7dda;
+        }
+        
+        button.import {
+            background-color: #FF9800;
+        }
+        
+        button.import:hover {
+            background-color: #e68900;
+        }
+        
+        .invoice-container {
+            border: 2px solid var(--primary-color);
+            padding: 20px;
+            background-color: white;
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            border-radius: var(--radius);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .invoice-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .company-info {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .invoice-title {
+            text-align: center;
+            flex: 2;
+            min-width: 250px;
+        }
+        
+        .invoice-details {
+            flex: 1;
+            text-align: right;
+            min-width: 130px;
+        }
+        
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 13px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .invoice-table th, .invoice-table td {
+            border: 1px solid var(--border-color);
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .invoice-table th {
+            background-color: var(--light-bg);
+            font-weight: 600;
+        }
+        
+        .total-row {
+            font-weight: bold;
+            background-color: #f9f9f9;
+        }
+        
+        .invoice-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .signature-section {
+            width: 45%;
+            min-width: 180px;
+            margin-bottom: 15px;
+        }
+        
+        .signature-line {
+            border-top: 1px solid #000;
+            margin-top: 50px;
+            padding-top: 5px;
+        }
+        
+        .security-section {
+            margin-top: 15px;
+            text-align: center;
+            border-top: 1px dashed #ccc;
+            padding-top: 12px;
+        }
+        
+        #qrcode {
+            display: inline-block;
+            margin: 8px auto;
+            width: 120px;
+            height: 120px;
+        }
+        
+        #qrcode canvas, #qrcode img {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .payment-code {
+            font-family: monospace;
+            font-size: 16px;
+            letter-spacing: 2px;
+            background-color: #f0f0f0;
+            padding: 6px 12px;
+            display: inline-block;
+            margin: 8px 0;
+            border-radius: var(--radius);
+            border: 1px dashed #ccc;
+        }
+        
+        .invoice-code {
+            font-family: monospace;
+            font-size: 14px;
+            background-color: #e9f7ef;
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            display: inline-block;
+            margin: 4px 0;
+            font-weight: 600;
+        }
+        
+        .actions {
+            text-align: center;
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+        
+        .pdf-format-selector {
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .pdf-format-selector label {
+            display: inline-flex;
+            align-items: center;
+            margin-right: 15px;
+            cursor: pointer;
+            gap: 4px;
+        }
+        
+        .filter-section {
+            background-color: var(--light-bg);
+            padding: 15px;
+            border-radius: var(--radius);
+            margin-bottom: 20px;
+        }
+        
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--primary-color);
+            margin: 8px 0;
+        }
+        
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 13px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .history-table th, .history-table td {
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            text-align: left;
+        }
+        
+        .history-table th {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .history-table tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+        
+        /* Analyse des ventes */
+        .charts-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .chart-card {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 15px;
+            transition: transform 0.3s;
+        }
+        
+        .chart-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .chart-card h3 {
+            margin-top: 0;
+            color: var(--dark-text);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 16px;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 280px;
+            width: 100%;
+        }
+        
+        .analysis-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .analysis-controls .form-group {
+            flex: 0 1 auto;
+            margin-bottom: 0;
+        }
+        
+        /* Section de vérification */
+        .verify-container {
+            background-color: white;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .scanner-container {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto 15px;
+        }
+        
+        #scanner {
+            width: 100%;
+            border-radius: var(--radius);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: var(--radius);
+        }
+        
+        .scanner-frame {
+            width: 70%;
+            height: 70%;
+            border: 3px solid var(--primary-color);
+            border-radius: 10px;
+            box-shadow: 0 0 0 1000px rgba(0, 0, 0, 0.3);
+        }
+        
+        .verification-result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: var(--radius);
+            text-align: center;
+            display: none;
+        }
+        
+        .verification-result.valid {
+            background-color: #e8f5e9;
+            border: 1px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+        
+        .verification-result.invalid {
+            background-color: #ffebee;
+            border: 1px solid var(--danger-color);
+            color: var(--danger-color);
+        }
+        
+        .verification-result h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .invoice-details-verification {
+            margin-top: 15px;
+            text-align: left;
+            background-color: var(--light-bg);
+            padding: 12px;
+            border-radius: var(--radius);
+        }
+        
+        /* Notifications de sauvegarde */
+        .save-notification {
+            position: fixed;
+            top: 15px;
+            right: 15px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 12px 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transform: translateX(150%);
+            transition: transform 0.3s ease;
+            max-width: 300px;
+        }
+        
+        .save-notification.show {
+            transform: translateX(0);
+        }
+        
+        .save-notification.error {
+            background-color: var(--danger-color);
+        }
+        
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .invoice-container, .invoice-container * {
+                visibility: visible;
+            }
+            .invoice-container {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        /* Tablettes (écrans moyens) */
+        @media (max-width: 1024px) {
+            .app-container {
+                padding: 15px;
+                margin: 10px auto;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            .invoice-container {
+                padding: 15px;
+            }
+            
+            .invoice-header, .invoice-footer {
+                flex-direction: column;
+            }
+            
+            .signature-section {
+                width: 100%;
+                margin-bottom: 20px;
+            }
+        }
+        
+        /* Tablettes petites et grands mobiles */
+        @media (max-width: 768px) {
+            body {
+                padding: 5px;
+            }
+            
+            .login-container {
+                padding: 25px;
+            }
+            
+            .app-container {
+                padding: 12px;
+                margin: 8px auto;
+            }
+            
+            .app-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .header-buttons {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .invoice-header, .invoice-footer {
+                flex-direction: column;
+            }
+            
+            .signature-section {
+                width: 100%;
+                margin-bottom: 25px;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+            }
+            
+            .invoice-table {
+                font-size: 12px;
+            }
+            
+            .invoice-table th, .invoice-table td {
+                padding: 6px;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .tab {
+                padding: 8px 15px;
+                font-size: 13px;
+            }
+            
+            button {
+                padding: 8px 12px;
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 220px;
+            }
+            
+            .actions {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .actions button {
+                width: 100%;
+                max-width: 280px;
+                margin-right: 0;
+            }
+            
+            .scanner-container {
+                max-width: 100%;
+            }
+            
+            .save-notification {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                transform: translateY(-100px);
+                max-width: none;
+            }
+            
+            .save-notification.show {
+                transform: translateY(0);
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-group {
+                flex: 1 1 100%;
+            }
+        }
+        
+        /* Mobiles (écrans petits) */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+            }
+            
+            .login-container h1 {
+                font-size: 20px;
+            }
+            
+            .app-header h1 {
+                font-size: 18px;
+            }
+            
+            .form-group {
+                flex: 1 1 100%;
+            }
+            
+            .invoice-title h1 {
+                font-size: 1.3rem;
+            }
+            
+            .invoice-table {
+                font-size: 10px;
+            }
+            
+            .invoice-table th, .invoice-table td {
+                padding: 4px;
+            }
+            
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .tab {
+                padding: 6px 12px;
+                font-size: 12px;
+            }
+            
+            .payment-code {
+                font-size: 14px;
+                letter-spacing: 1px;
+            }
+            
+            .invoice-code {
+                font-size: 12px;
+            }
+            
+            #qrcode {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .form-section h2, .invoice-preview h2, .history-section h2, .sales-analysis-section h2, .verify-section h2 {
+                font-size: 18px;
+            }
+        }
+        
+        /* Très petits écrans */
+        @media (max-width: 320px) {
+            .login-container {
+                padding: 15px;
+            }
+            
+            .app-container {
+                padding: 10px;
+            }
+            
+            .app-header h1 {
+                font-size: 16px;
+            }
+            
+            .tab {
+                padding: 5px 10px;
+                font-size: 11px;
+            }
+            
+            button {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+            
+            .invoice-container {
+                padding: 10px;
+            }
+            
+            .invoice-table {
+                font-size: 9px;
+            }
+            
+            .payment-code {
+                font-size: 12px;
+            }
+            
+            .invoice-code {
+                font-size: 11px;
+            }
+            
+            #qrcode {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Écran de connexion -->
+    <div class="login-container" id="loginContainer">
+        <h1><i class="fas fa-file-invoice-dollar"></i> Connexion</h1>
+        <form class="login-form" id="loginForm">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Identifiant</label>
+                <input type="text" id="username" required>
+            </div>
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Mot de passe</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="login-button"><i class="fas fa-sign-in-alt"></i> Se connecter</button>
+            <div class="error-message" id="errorMessage"><i class="fas fa-exclamation-triangle"></i> Identifiant ou mot de passe incorrect</div>
+        </form>
+    </div>
+
+    <!-- Application principale -->
+    <div class="app-container" id="appContainer">
+        <div class="app-header">
+            <h1><i class="fas fa-file-invoice-dollar"></i> Gestionnaire de Factures Sécurisées</h1>
+            <div class="header-buttons">
+                <button class="logout-button" id="logoutButton"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
+                <button class="backup-button" id="backupButton" title="Sauvegarde automatique activée"><i class="fas fa-shield-alt"></i> Sauvegarde</button>
+            </div>
+        </div>
+        
+        <div class="tabs">
+            <div class="tab active" data-tab="create"><i class="fas fa-plus-circle"></i> Créer une Facture</div>
+            <div class="tab" data-tab="history"><i class="fas fa-history"></i> Historique et Statistiques</div>
+            <div class="tab" data-tab="sales"><i class="fas fa-chart-bar"></i> Analyse des Ventes</div>
+            <div class="tab" data-tab="verify"><i class="fas fa-qrcode"></i> Vérifier une Facture</div>
+        </div>
+        
+        <!-- Onglet Création de facture -->
+        <div id="create-tab" class="tab-content active">
+            <div class="form-section">
+                <h2><i class="fas fa-file-alt"></i> Informations de la Facture</h2>
+                <form id="invoiceForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="date"><i class="fas fa-calendar-alt"></i> Date de la facture</label>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="companyName"><i class="fas fa-building"></i> Nom de l'entreprise</label>
+                            <input type="text" id="companyName" value="JEANSKODOC" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="companyAddress"><i class="fas fa-map-marker-alt"></i> Adresse de l'entreprise</label>
+                            <textarea id="companyAddress" rows="3" required>Kara-Togo</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="clientName"><i class="fas fa-user-tie"></i> Nom du client</label>
+                            <input type="text" id="clientName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="ownerName"><i class="fas fa-user"></i> Nom du propriétaire</label>
+                            <input type="text" id="ownerName" value="M. KOLA" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="invoiceNumber"><i class="fas fa-hashtag"></i> Numéro de facture</label>
+                            <input type="text" id="invoiceNumber" required>
+                        </div>
+                    </div>
+                    
+                    <h3><i class="fas fa-shopping-cart"></i> Articles / Services</h3>
+                    <div id="itemsContainer">
+                        <div class="item-row form-row">
+                            <div class="form-group">
+                                <label>Article/Service</label>
+                                <select class="item-type" required>
+                                    <option value="">Sélectionnez...</option>
+                                    <option value="scolaire">Scolaire</option>
+                                    <option value="piece">Pièce détachée</option>
+                                    <option value="vetement">Vêtement</option>
+                                    <option value="aliment">Aliment</option>
+                                    <option value="photocopie">Photocopie de documents</option>
+                                    <option value="impression">Impression de documents</option>
+                                    <option value="couverture">Couverture</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="item-description" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Quantité</label>
+                                <input type="number" class="item-quantity" min="1" value="1" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Prix unitaire (FCFA)</label>
+                                <input type="number" class="item-price" min="0" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Total (FCFA)</label>
+                                <input type="text" class="item-total" readonly>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <button type="button" id="addItem"><i class="fas fa-plus"></i> Ajouter un article</button>
+                    </div>
+                    
+                    <div class="actions">
+                        <button type="button" id="generateInvoice"><i class="fas fa-file-invoice"></i> Générer la facture</button>
+                        <button type="button" id="resetInvoice" class="reset"><i class="fas fa-redo"></i> Nouvelle facture</button>
+                    </div>
+                </form>
+            </div>
+            
+            <div class="invoice-preview" id="invoicePreview" style="display: none;">
+                <h2><i class="fas fa-eye"></i> Aperçu de la Facture</h2>
+                <div class="invoice-container" id="invoiceContainer">
+                    <div class="invoice-header">
+                        <div class="company-info">
+                            <h3 id="previewCompanyName"></h3>
+                            <p id="previewCompanyAddress"></p>
+                        </div>
+                        <div class="invoice-title">
+                            <h1>FACTURE</h1>
+                            <p id="previewInvoiceNumber"></p>
+                            <div class="invoice-code" id="previewInvoiceCode"></div>
+                        </div>
+                        <div class="invoice-details">
+                            <p>Date: <span id="previewDate"></span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="client-info">
+                        <h4>Client:</h4>
+                        <p id="previewClientName"></p>
+                    </div>
+                    
+                    <table class="invoice-table">
+                        <thead>
+                            <tr>
+                                <th>Article/Service</th>
+                                <th>Description</th>
+                                <th>Quantité</th>
+                                <th>Prix unitaire (FCFA)</th>
+                                <th>Total (FCFA)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewItems">
+                        </tbody>
+                        <tfoot>
+                            <tr class="total-row">
+                                <td colspan="4" style="text-align: right;">Total:</td>
+                                <td id="previewTotal">0 FCFA</td>
+                            </tr>
+                            <tr>
+                                <td colspan="5" style="text-align: center;">
+                                    <strong>Arrêtée la présente facture à la somme de :</strong>
+                                    <div id="previewTotalLetters"></div>
+                                </td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                    
+                    <div class="invoice-footer">
+                        <div class="signature-section">
+                            <p>Le client</p>
+                            <p id="previewClientNameFooter"></p>
+                            <div class="signature-line">Signature</div>
+                        </div>
+                        <div class="signature-section">
+                            <p>Le propriétaire</p>
+                            <p id="previewOwnerName"></p>
+                            <div class="signature-line">Signature</div>
+                        </div>
+                    </div>
+                    
+                    <div class="security-section">
+                        <p><strong>Code de vérification de la facture :</strong></p>
+                        <div class="payment-code" id="paymentCode"></div>
+                        <div id="qrcode"></div>
+                        <p><small>Scannez ce QR Code pour vérifier l'authenticité de cette facture</small></p>
+                    </div>
+                </div>
+                
+                <div class="pdf-format-selector">
+                    <label>
+                        <input type="radio" name="pdfFormat" value="A4" checked> Format A4
+                    </label>
+                    <label>
+                        <input type="radio" name="pdfFormat" value="A5"> Format A5
+                    </label>
+                </div>
+                
+                <div class="actions no-print">
+                    <button type="button" id="downloadPDF"><i class="fas fa-file-pdf"></i> Télécharger en PDF</button>
+                    <button type="button" id="printInvoice"><i class="fas fa-print"></i> Imprimer la facture</button>
+                    <button type="button" id="sendWhatsApp" class="whatsapp"><i class="fab fa-whatsapp"></i> Envoyer par WhatsApp</button>
+                    <button type="button" id="saveInvoice" class="secondary"><i class="fas fa-save"></i> Sauvegarder la facture</button>
+                    <button type="button" id="exportInvoice" class="export"><i class="fas fa-file-export"></i> Exporter en JSON</button>
+                    <button type="button" id="resetFromPreview" class="reset"><i class="fas fa-redo"></i> Nouvelle facture</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Onglet Historique -->
+        <div id="history-tab" class="tab-content">
+            <div class="history-section">
+                <h2><i class="fas fa-history"></i> Historique et Statistiques des Factures</h2>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-filter"></i> Filtres</h3>
+                    <div class="filter-row">
+                        <div class="form-group">
+                            <label for="filterDate">Filtrer par date:</label>
+                            <input type="date" id="filterDate">
+                        </div>
+                        <div class="form-group">
+                            <label for="filterMonth">Filtrer par mois:</label>
+                            <input type="month" id="filterMonth">
+                        </div>
+                        <div class="form-group">
+                            <label for="filterArticle">Filtrer par article:</label>
+                            <select id="filterArticle">
+                                <option value="">Tous les articles</option>
+                                <option value="scolaire">Scolaire</option>
+                                <option value="piece">Pièce détachée</option>
+                                <option value="vetement">Vêtement</option>
+                                <option value="aliment">Aliment</option>
+                                <option value="photocopie">Photocopie de documents</option>
+                                <option value="impression">Impression de documents</option>
+                                <option value="couverture">Couverture</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="filter-row">
+                        <button type="button" id="applyFilters"><i class="fas fa-check"></i> Appliquer les filtres</button>
+                        <button type="button" id="clearFilters" class="secondary"><i class="fas fa-times"></i> Effacer les filtres</button>
+                        <button type="button" id="exportAllInvoices" class="export"><i class="fas fa-file-export"></i> Exporter toutes les factures</button>
+                        <button type="button" id="importInvoices" class="import"><i class="fas fa-file-import"></i> Importer des factures</button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;">
+                        <button type="button" id="manualBackup" class="secondary"><i class="fas fa-cloud-download-alt"></i> Sauvegarde manuelle</button>
+                    </div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <h3><i class="fas fa-calendar-day"></i> Total du jour</h3>
+                        <div class="stat-value" id="dailyTotal">0 FCFA</div>
+                        <p id="dailyCount">0 facture(s)</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-calendar-month"></i> Total du mois</h3>
+                        <div class="stat-value" id="monthlyTotal">0 FCFA</div>
+                        <p id="monthlyCount">0 facture(s)</p>
+                    </div>
+                    <div class="stat-card">
+                        <h3><i class="fas fa-box"></i> Total par article</h3>
+                        <div class="stat-value" id="articleTotal">0 FCFA</div>
+                        <p id="articleCount">0 article(s)</p>
+                    </div>
+                </div>
+                
+                <h3><i class="fas fa-list"></i> Liste des factures</h3>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>N° Facture</th>
+                            <th>Client</th>
+                            <th>Articles</th>
+                            <th>Total (FCFA)</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="invoicesList">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Onglet Analyse des ventes -->
+        <div id="sales-tab" class="tab-content">
+            <div class="sales-analysis-section">
+                <h2><i class="fas fa-chart-bar"></i> Analyse des Ventes</h2>
+                
+                <div class="filter-section">
+                    <h3><i class="fas fa-filter"></i> Filtres d'analyse</h3>
+                    <div class="analysis-controls">
+                        <div class="form-group">
+                            <label for="analysisMonth">Mois:</label>
+                            <input type="month" id="analysisMonth">
+                        </div>
+                        <div class="form-group">
+                            <label for="analysisArticle">Article:</label>
+                            <select id="analysisArticle">
+                                <option value="">Tous les articles</option>
+                                <option value="scolaire">Scolaire</option>
+                                <option value="piece">Pièce détachée</option>
+                                <option value="vetement">Vêtement</option>
+                                <option value="aliment">Aliment</option>
+                                <option value="photocopie">Photocopie de documents</option>
+                                <option value="impression">Impression de documents</option>
+                                <option value="couverture">Couverture</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        <button type="button" id="updateCharts" class="analysis"><i class="fas fa-sync-alt"></i> Mettre à jour les graphiques</button>
+                    </div>
+                </div>
+                
+                <div class="charts-container">
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-bar"></i> Ventes par Article (Montant)</h3>
+                        <div class="chart-container">
+                            <canvas id="salesByArticleChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-line"></i> Ventes par Article (Quantité)</h3>
+                        <div class="chart-container">
+                            <canvas id="quantityByArticleChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-area"></i> Évolution des Ventes Mensuelles</h3>
+                        <div class="chart-container">
+                            <canvas id="monthlySalesChart"></canvas>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-card">
+                        <h3><i class="fas fa-chart-pie"></i> Répartition des Ventes</h3>
+                        <div class="chart-container">
+                            <canvas id="salesDistributionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Onglet Vérification -->
+        <div id="verify-tab" class="tab-content">
+            <div class="verify-section">
+                <h2><i class="fas fa-qrcode"></i> Vérifier l'Authenticité d'une Facture</h2>
+                
+                <div class="verify-container">
+                    <div class="form-group">
+                        <label for="verificationMethod">Méthode de vérification:</label>
+                        <select id="verificationMethod">
+                            <option value="scanner">Scanner le QR Code</option>
+                            <option value="manual">Saisie manuelle</option>
+                        </select>
+                    </div>
+                    
+                    <div id="scannerSection">
+                        <div class="scanner-container">
+                            <video id="scanner" autoplay playsinline></video>
+                            <div class="scanner-overlay" id="scannerOverlay">
+                                <div class="scanner-frame"></div>
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button type="button" id="startScanner"><i class="fas fa-camera"></i> Démarrer le scanner</button>
+                            <button type="button" id="stopScanner" class="secondary" style="display: none;"><i class="fas fa-stop"></i> Arrêter le scanner</button>
+                            <button type="button" id="uploadImage" class="secondary"><i class="fas fa-upload"></i> Charger une image</button>
+                            <input type="file" id="imageUpload" accept="image/*" style="display: none;">
+                        </div>
+                    </div>
+                    
+                    <div id="manualSection" style="display: none;">
+                        <div class="form-group">
+                            <label for="manualInvoiceCode">Code de la facture:</label>
+                            <input type="text" id="manualInvoiceCode" placeholder="Ex: ABC123#">
+                        </div>
+                        <div class="form-group">
+                            <label for="manualPaymentCode">Code de paiement:</label>
+                            <input type="text" id="manualPaymentCode" placeholder="Ex: 1234-5678-9012">
+                        </div>
+                        <div class="actions">
+                            <button type="button" id="verifyManually"><i class="fas fa-check-circle"></i> Vérifier manuellement</button>
+                        </div>
+                    </div>
+                    
+                    <div class="verification-result" id="verificationResult">
+                        <h3 id="resultTitle"></h3>
+                        <p id="resultMessage"></p>
+                        <div class="invoice-details-verification" id="invoiceDetailsVerification" style="display: none;">
+                            <h4>Détails de la facture:</h4>
+                            <p><strong>Numéro:</strong> <span id="verifiedInvoiceNumber"></span></p>
+                            <p><strong>Client:</strong> <span id="verifiedClientName"></span></p>
+                            <p><strong>Date:</strong> <span id="verifiedDate"></span></p>
+                            <p><strong>Montant:</strong> <span id="verifiedAmount"></span></p>
+                            <p><strong>Code de facture:</strong> <span id="verifiedInvoiceCode"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification de sauvegarde -->
+    <div class="save-notification" id="saveNotification">
+        <i class="fas fa-check-circle"></i>
+        <span id="saveMessage">Sauvegarde automatique réussie</span>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Vérifier si l'utilisateur est déjà connecté
+            if (localStorage.getItem('isAuthenticated') === 'true') {
+                showApp();
+            } else {
+                showLogin();
+            }
+            
+            // Gestion de la connexion
+            document.getElementById('loginForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                const username = document.getElementById('username').value;
+                const password = document.getElementById('password').value;
+                
+                if (username === 'admin' && password === 'admin123') {
+                    localStorage.setItem('isAuthenticated', 'true');
+                    showApp();
+                } else {
+                    document.getElementById('errorMessage').style.display = 'block';
+                }
+            });
+            
+            // Gestion de la déconnexion
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                localStorage.removeItem('isAuthenticated');
+                showLogin();
+            });
+            
+            function showLogin() {
+                document.getElementById('loginContainer').style.display = 'block';
+                document.getElementById('appContainer').style.display = 'none';
+            }
+            
+            function showApp() {
+                document.getElementById('loginContainer').style.display = 'none';
+                document.getElementById('appContainer').style.display = 'block';
+                document.getElementById('errorMessage').style.display = 'none';
+                
+                // Initialiser l'application
+                initApp();
+            }
+            
+            function initApp() {
+                // Variables globales
+                let itemsCount = 1;
+                let invoices = JSON.parse(localStorage.getItem('invoices')) || [];
+                let currentInvoice = null;
+                let salesChart, quantityChart, monthlyChart, distributionChart;
+                let scannerStream = null;
+                let autoSaveInterval;
+                let lastBackupTime = localStorage.getItem('lastBackupTime') || 0;
+                
+                // Initialiser automatiquement la date du jour
+                function initializeCurrentDate() {
+                    const today = new Date();
+                    const formattedDate = today.toISOString().split('T')[0];
+                    document.getElementById('date').value = formattedDate;
+                }
+                
+                // Générer automatiquement un numéro de facture
+                function generateInvoiceNumber() {
+                    const today = new Date();
+                    const year = today.getFullYear();
+                    const month = String(today.getMonth() + 1).padStart(2, '0');
+                    const day = String(today.getDate()).padStart(2, '0');
+                    
+                    // Compter le nombre de factures créées aujourd'hui
+                    const todayInvoices = invoices.filter(inv => {
+                        const invoiceDate = new Date(inv.date);
+                        return invoiceDate.toDateString() === today.toDateString();
+                    });
+                    
+                    const sequence = String(todayInvoices.length + 1).padStart(3, '0');
+                    return `FACT-${year}${month}${day}-${sequence}`;
+                }
+                
+                // CORRECTION : Appeler l'initialisation au démarrage et à chaque nouvelle facture
+                function initializeNewInvoice() {
+                    initializeCurrentDate();
+                    document.getElementById('invoiceNumber').value = generateInvoiceNumber();
+                    document.getElementById('clientName').value = '';
+                    
+                    // Réinitialiser les articles
+                    const itemsContainer = document.getElementById('itemsContainer');
+                    while (itemsContainer.children.length > 1) {
+                        itemsContainer.removeChild(itemsContainer.lastChild);
+                    }
+                    
+                    const firstItemRow = itemsContainer.querySelector('.item-row');
+                    firstItemRow.querySelector('.item-type').value = '';
+                    firstItemRow.querySelector('.item-description').value = '';
+                    firstItemRow.querySelector('.item-quantity').value = '1';
+                    firstItemRow.querySelector('.item-price').value = '';
+                    firstItemRow.querySelector('.item-total').value = '';
+                    
+                    currentInvoice = null;
+                    document.getElementById('invoicePreview').style.display = 'none';
+                }
+                
+                // Appeler l'initialisation au démarrage
+                initializeNewInvoice();
+                
+                // CORRECTION : Fonction améliorée pour convertir les nombres en lettres
+                function numberToFrenchWords(num) {
+                    if (num === 0) return 'zéro';
+                    
+                    const units = ['', 'un', 'deux', 'trois', 'quatre', 'cinq', 'six', 'sept', 'huit', 'neuf'];
+                    const teens = ['dix', 'onze', 'douze', 'treize', 'quatorze', 'quinze', 'seize', 'dix-sept', 'dix-huit', 'dix-neuf'];
+                    const tens = ['', '', 'vingt', 'trente', 'quarante', 'cinquante', 'soixante', 'soixante-dix', 'quatre-vingt', 'quatre-vingt-dix'];
+                    
+                    function convertBelow1000(n) {
+                        if (n === 0) return '';
+                        
+                        if (n < 10) return units[n];
+                        if (n < 20) return teens[n - 10];
+                        
+                        if (n < 100) {
+                            const ten = Math.floor(n / 10);
+                            const unit = n % 10;
+                            
+                            if (ten === 7 || ten === 9) {
+                                // Cas spéciaux pour soixante-dix et quatre-vingt-dix
+                                const base = ten === 7 ? 60 : 80;
+                                const remainder = n - base;
+                                if (remainder === 0) return tens[ten];
+                                if (remainder === 1) return tens[ten] + '-et-un';
+                                return tens[ten] + '-' + convertBelow1000(remainder);
+                            }
+                            
+                            if (unit === 0) return tens[ten];
+                            if (unit === 1) return tens[ten] + '-et-un';
+                            return tens[ten] + '-' + units[unit];
+                        }
+                        
+                        // 100 à 999
+                        const hundred = Math.floor(n / 100);
+                        const remainder = n % 100;
+                        
+                        if (hundred === 1) {
+                            if (remainder === 0) return 'cent';
+                            return 'cent ' + convertBelow1000(remainder);
+                        } else {
+                            if (remainder === 0) return units[hundred] + ' cents';
+                            return units[hundred] + ' cent ' + convertBelow1000(remainder);
+                        }
+                    }
+                    
+                    let result = '';
+                    let remaining = Math.floor(num);
+                    
+                    // Millions
+                    if (remaining >= 1000000) {
+                        const millions = Math.floor(remaining / 1000000);
+                        result += convertBelow1000(millions) + ' million' + (millions > 1 ? 's' : '') + ' ';
+                        remaining %= 1000000;
+                    }
+                    
+                    // Milliers
+                    if (remaining >= 1000) {
+                        const thousands = Math.floor(remaining / 1000);
+                        if (thousands === 1) {
+                            result += 'mille ';
+                        } else {
+                            result += convertBelow1000(thousands) + ' mille ';
+                        }
+                        remaining %= 1000;
+                    }
+                    
+                    // Reste (centaines, dizaines, unités)
+                    if (remaining > 0) {
+                        result += convertBelow1000(remaining);
+                    }
+                    
+                    return result.trim() + ' Francs CFA';
+                }
+
+                // CORRECTION : Fonction améliorée pour générer le QR Code
+                function generateQRCode(data) {
+                    const qrContainer = document.getElementById('qrcode');
+                    qrContainer.innerHTML = '';
+                    
+                    try {
+                        if (typeof QRCode !== 'undefined') {
+                            new QRCode(qrContainer, {
+                                text: data,
+                                width: 128,
+                                height: 128,
+                                colorDark: "#000000",
+                                colorLight: "#ffffff",
+                                correctLevel: QRCode.CorrectLevel.H
+                            });
+                        } else {
+                            throw new Error('Bibliothèque QRCode non chargée');
+                        }
+                    } catch (error) {
+                        console.error('Erreur génération QR Code:', error);
+                        qrContainer.innerHTML = `
+                            <div style="width:128px;height:128px;background:#f0f0f0;display:flex;align-items:center;justify-content:center;border:1px solid #ccc;">
+                                <div style="text-align:center;color:#666;font-size:12px;">
+                                    <i class="fas fa-exclamation-triangle"></i><br>
+                                    QR Code<br>Non disponible
+                                </div>
+                            </div>
+                        `;
+                    }
+                }
+                
+                // CORRECTION : Fonction pour mettre à jour automatiquement le QR Code
+                function updateQRCodeAutomatically() {
+                    if (!currentInvoice) return;
+                    
+                    // Recalculer le total
+                    const total = calculateTotal();
+                    
+                    // Mettre à jour le montant total affiché
+                    document.getElementById('previewTotal').textContent = formatCurrency(total);
+                    
+                    // Mettre à jour le montant total en lettres
+                    document.getElementById('previewTotalLetters').textContent = numberToFrenchWords(total);
+                    
+                    // Générer le nouveau QR Code
+                    const qrData = `Facture: ${currentInvoice.invoiceNumber}, Code: ${currentInvoice.invoiceCode}, Montant: ${formatCurrency(total)}, Code Paiement: ${currentInvoice.paymentCode}`;
+                    generateQRCode(qrData);
+                    
+                    // Mettre à jour l'objet currentInvoice
+                    currentInvoice.total = total;
+                    
+                    console.log('QR Code mis à jour automatiquement');
+                }
+                
+                // Fonction pour calculer le total
+                function calculateTotal() {
+                    let total = 0;
+                    document.querySelectorAll('.item-row').forEach(row => {
+                        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
+                        const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                        total += quantity * price;
+                    });
+                    return total;
+                }
+                
+                // Initialiser le système de sauvegarde automatique
+                function initAutoSave() {
+                    autoSaveInterval = setInterval(() => {
+                        performBackup(false);
+                    }, 120000);
+                    
+                    window.addEventListener('beforeunload', function() {
+                        performBackup(false);
+                    });
+                    
+                    performBackup(false);
+                }
+                
+                // Fonction pour effectuer la sauvegarde
+                function performBackup(isManual) {
+                    try {
+                        const backupData = {
+                            invoices: invoices,
+                            timestamp: new Date().getTime(),
+                            version: '1.0'
+                        };
+                        
+                        localStorage.setItem('invoiceBackup', JSON.stringify(backupData));
+                        lastBackupTime = backupData.timestamp;
+                        localStorage.setItem('lastBackupTime', lastBackupTime);
+                        
+                        try {
+                            sessionStorage.setItem('invoiceBackup', JSON.stringify(backupData));
+                        } catch (e) {
+                            console.warn('SessionStorage non disponible pour la sauvegarde');
+                        }
+                        
+                        const backupCount = parseInt(localStorage.getItem('backupCount') || '0');
+                        if (!isManual && backupCount % 10 === 0) {
+                            downloadBackupFile(backupData);
+                        }
+                        
+                        localStorage.setItem('backupCount', (backupCount + 1).toString());
+                        
+                        showSaveNotification('Sauvegarde automatique réussie', false);
+                        
+                        console.log('Sauvegarde effectuée:', new Date().toLocaleString());
+                        
+                    } catch (error) {
+                        console.error('Erreur lors de la sauvegarde:', error);
+                        showSaveNotification('Erreur lors de la sauvegarde', true);
+                    }
+                }
+                
+                // Fonction pour télécharger un fichier de sauvegarde
+                function downloadBackupFile(backupData) {
+                    const dataStr = JSON.stringify(backupData, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    
+                    const exportFileDefaultName = `sauvegarde_factures_${new Date().toISOString().split('T')[0]}.json`;
+                    
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.style.display = 'none';
+                    document.body.appendChild(linkElement);
+                    linkElement.click();
+                    document.body.removeChild(linkElement);
+                }
+                
+                // Fonction pour afficher la notification de sauvegarde
+                function showSaveNotification(message, isError) {
+                    const notification = document.getElementById('saveNotification');
+                    const messageElement = document.getElementById('saveMessage');
+                    
+                    messageElement.textContent = message;
+                    notification.className = 'save-notification';
+                    
+                    if (isError) {
+                        notification.classList.add('error');
+                        notification.querySelector('i').className = 'fas fa-exclamation-triangle';
+                    } else {
+                        notification.querySelector('i').className = 'fas fa-check-circle';
+                    }
+                    
+                    notification.classList.add('show');
+                    
+                    setTimeout(() => {
+                        notification.classList.remove('show');
+                    }, 3000);
+                }
+                
+                // Fonction pour afficher le statut de sauvegarde
+                function showBackupStatus() {
+                    const backupTime = new Date(parseInt(lastBackupTime));
+                    const now = new Date();
+                    const diffMinutes = Math.floor((now - backupTime) / (1000 * 60));
+                    
+                    let statusMessage;
+                    if (diffMinutes < 2) {
+                        statusMessage = `Sauvegarde à jour (il y a ${diffMinutes} minute${diffMinutes > 1 ? 's' : ''})`;
+                    } else if (diffMinutes < 10) {
+                        statusMessage = `Sauvegarde récente (il y a ${diffMinutes} minutes)`;
+                    } else {
+                        statusMessage = `Sauvegarde ancienne (il y a ${diffMinutes} minutes)`;
+                    }
+                    
+                    alert(`Statut de sauvegarde:\n${statusMessage}\n\nProchaine sauvegarde automatique dans ${2 - (diffMinutes % 2)} minute${2 - (diffMinutes % 2) > 1 ? 's' : ''}`);
+                }
+                
+                // Restauration depuis la sauvegarde en cas de problème
+                function restoreFromBackup() {
+                    try {
+                        const backup = localStorage.getItem('invoiceBackup');
+                        if (backup) {
+                            const backupData = JSON.parse(backup);
+                            invoices = backupData.invoices || [];
+                            localStorage.setItem('invoices', JSON.stringify(invoices));
+                            console.log('Restauration depuis sauvegarde effectuée');
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors de la restauration:', error);
+                    }
+                }
+                
+                // Vérifier et restaurer si nécessaire au démarrage
+                if (invoices.length === 0) {
+                    restoreFromBackup();
+                }
+
+                // Gestion des onglets
+                document.querySelectorAll('.tab').forEach(tab => {
+                    tab.addEventListener('click', function() {
+                        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                        
+                        this.classList.add('active');
+                        document.getElementById(this.getAttribute('data-tab') + '-tab').classList.add('active');
+                        
+                        if (this.getAttribute('data-tab') === 'history') {
+                            loadInvoices();
+                            updateStats();
+                        } else if (this.getAttribute('data-tab') === 'sales') {
+                            updateCharts();
+                        } else if (this.getAttribute('data-tab') === 'verify') {
+                            stopScanner();
+                        }
+                    });
+                });
+                
+                // CORRECTION : Réinitialiser avec nouvelle facture
+                document.getElementById('resetInvoice').addEventListener('click', function() {
+                    initializeNewInvoice();
+                });
+                
+                document.getElementById('resetFromPreview').addEventListener('click', function() {
+                    initializeNewInvoice();
+                });
+                
+                // Gestion de la méthode de vérification
+                document.getElementById('verificationMethod').addEventListener('change', function() {
+                    const method = this.value;
+                    if (method === 'scanner') {
+                        document.getElementById('scannerSection').style.display = 'block';
+                        document.getElementById('manualSection').style.display = 'none';
+                    } else {
+                        document.getElementById('scannerSection').style.display = 'none';
+                        document.getElementById('manualSection').style.display = 'block';
+                        stopScanner();
+                    }
+                });
+                
+                // Démarrer le scanner
+                document.getElementById('startScanner').addEventListener('click', startScanner);
+                
+                // Arrêter le scanner
+                document.getElementById('stopScanner').addEventListener('click', stopScanner);
+                
+                // Charger une image pour analyse
+                document.getElementById('uploadImage').addEventListener('click', function() {
+                    document.getElementById('imageUpload').click();
+                });
+                
+                document.getElementById('imageUpload').addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        const img = new Image();
+                        img.onload = function() {
+                            scanQRCodeFromImage(img);
+                        };
+                        img.src = URL.createObjectURL(file);
+                    }
+                });
+                
+                // Vérification manuelle
+                document.getElementById('verifyManually').addEventListener('click', function() {
+                    const invoiceCode = document.getElementById('manualInvoiceCode').value;
+                    const paymentCode = document.getElementById('manualPaymentCode').value;
+                    
+                    if (!invoiceCode || !paymentCode) {
+                        alert('Veuillez saisir les deux codes de vérification.');
+                        return;
+                    }
+                    
+                    verifyInvoice(invoiceCode, paymentCode);
+                });
+                
+                // Fonction pour démarrer le scanner
+                function startScanner() {
+                    const video = document.getElementById('scanner');
+                    const startButton = document.getElementById('startScanner');
+                    const stopButton = document.getElementById('stopScanner');
+                    const overlay = document.getElementById('scannerOverlay');
+                    
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+                        .then(function(stream) {
+                            scannerStream = stream;
+                            video.srcObject = stream;
+                            startButton.style.display = 'none';
+                            stopButton.style.display = 'inline-flex';
+                            overlay.style.display = 'none';
+                            
+                            scanQRCodeFromVideo(video);
+                        })
+                        .catch(function(err) {
+                            console.error("Erreur d'accès à la caméra: ", err);
+                            alert("Impossible d'accéder à la caméra. Vérifiez les permissions.");
+                        });
+                }
+                
+                // Fonction pour arrêter le scanner
+                function stopScanner() {
+                    const video = document.getElementById('scanner');
+                    const startButton = document.getElementById('startScanner');
+                    const stopButton = document.getElementById('stopScanner');
+                    const overlay = document.getElementById('scannerOverlay');
+                    
+                    if (scannerStream) {
+                        scannerStream.getTracks().forEach(track => track.stop());
+                        scannerStream = null;
+                    }
+                    
+                    video.srcObject = null;
+                    startButton.style.display = 'inline-flex';
+                    stopButton.style.display = 'none';
+                    overlay.style.display = 'flex';
+                }
+                
+                // Fonction pour scanner les QR Codes depuis la vidéo
+                function scanQRCodeFromVideo(video) {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    
+                    function scanFrame() {
+                        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                            canvas.width = video.videoWidth;
+                            canvas.height = video.videoHeight;
+                            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                            
+                            const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                            const code = jsQR(imageData.data, imageData.width, imageData.height);
+                            
+                            if (code) {
+                                processQRCodeData(code.data);
+                                stopScanner();
+                            }
+                        }
+                        
+                        if (scannerStream) {
+                            requestAnimationFrame(scanFrame);
+                        }
+                    }
+                    
+                    scanFrame();
+                }
+                
+                // Fonction pour scanner les QR Codes depuis une image
+                function scanQRCodeFromImage(img) {
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    context.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+                    const code = jsQR(imageData.data, imageData.width, imageData.height);
+                    
+                    if (code) {
+                        processQRCodeData(code.data);
+                    } else {
+                        alert('Aucun QR Code valide trouvé dans l\'image.');
+                    }
+                }
+                
+                // CORRECTION : Fonction améliorée pour traiter les données du QR Code
+                function processQRCodeData(data) {
+                    try {
+                        // Format attendu: "Facture: NUM, Code: CODE, Montant: MONTANT, Code Paiement: PAYMENT"
+                        const invoiceMatch = data.match(/Facture:\s*([^,]+),\s*Code:\s*([^,]+),\s*Montant:\s*([^,]+),\s*Code Paiement:\s*(.+)/);
+                        
+                        if (invoiceMatch) {
+                            const invoiceNumber = invoiceMatch[1].trim();
+                            const invoiceCode = invoiceMatch[2].trim();
+                            const amount = invoiceMatch[3].trim();
+                            const paymentCode = invoiceMatch[4].trim();
+                            
+                            verifyInvoice(invoiceCode, paymentCode);
+                        } else {
+                            // Essayer un autre format
+                            const parts = data.split(',');
+                            if (parts.length >= 4) {
+                                const invoiceNumber = parts[0].replace('Facture:', '').trim();
+                                const invoiceCode = parts[1].replace('Code:', '').trim();
+                                const amount = parts[2].replace('Montant:', '').trim();
+                                const paymentCode = parts[3].replace('Code Paiement:', '').trim();
+                                
+                                verifyInvoice(invoiceCode, paymentCode);
+                            } else {
+                                throw new Error('Format de QR Code non reconnu');
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Erreur lors du traitement du QR Code:', error);
+                        showVerificationResult(false, 'Format de QR Code invalide.');
+                    }
+                }
+                
+                // Fonction pour vérifier l'authenticité d'une facture
+                function verifyInvoice(invoiceCode, paymentCode) {
+                    const invoice = invoices.find(inv => 
+                        inv.invoiceCode === invoiceCode && inv.paymentCode === paymentCode
+                    );
+                    
+                    if (invoice) {
+                        showVerificationResult(true, 'Cette facture est authentique.', invoice);
+                    } else {
+                        showVerificationResult(false, 'Cette facture n\'a pas été trouvée dans notre système ou les codes sont incorrects.');
+                    }
+                }
+                
+                // Fonction pour afficher le résultat de la vérification
+                function showVerificationResult(isValid, message, invoice = null) {
+                    const resultDiv = document.getElementById('verificationResult');
+                    const resultTitle = document.getElementById('resultTitle');
+                    const resultMessage = document.getElementById('resultMessage');
+                    const detailsDiv = document.getElementById('invoiceDetailsVerification');
+                    
+                    resultDiv.className = 'verification-result';
+                    detailsDiv.style.display = 'none';
+                    
+                    if (isValid) {
+                        resultDiv.classList.add('valid');
+                        resultTitle.innerHTML = '<i class="fas fa-check-circle"></i> Facture Authentique';
+                        resultMessage.textContent = message;
+                        
+                        if (invoice) {
+                            document.getElementById('verifiedInvoiceNumber').textContent = invoice.invoiceNumber;
+                            document.getElementById('verifiedClientName').textContent = invoice.clientName;
+                            document.getElementById('verifiedDate').textContent = formatDate(invoice.date);
+                            document.getElementById('verifiedAmount').textContent = formatCurrency(invoice.total);
+                            document.getElementById('verifiedInvoiceCode').textContent = invoice.invoiceCode;
+                            detailsDiv.style.display = 'block';
+                        }
+                    } else {
+                        resultDiv.classList.add('invalid');
+                        resultTitle.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Facture Non Valide';
+                        resultMessage.textContent = message;
+                    }
+                    
+                    resultDiv.style.display = 'block';
+                    resultDiv.scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                // Ajouter un nouvel article
+                document.getElementById('addItem').addEventListener('click', function() {
+                    itemsCount++;
+                    const itemsContainer = document.getElementById('itemsContainer');
+                    const newItemRow = document.createElement('div');
+                    newItemRow.className = 'item-row form-row';
+                    newItemRow.innerHTML = `
+                        <div class="form-group">
+                            <label>Article/Service</label>
+                            <select class="item-type" required>
+                                <option value="">Sélectionnez...</option>
+                                <option value="scolaire">Scolaire</option>
+                                <option value="piece">Pièce détachée</option>
+                                <option value="vetement">Vêtement</option>
+                                <option value="aliment">Aliment</option>
+                                <option value="photocopie">Photocopie de documents</option>
+                                <option value="impression">Impression de documents</option>
+                                <option value="couverture">Couverture</option>
+                                <option value="autre">Autre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <input type="text" class="item-description" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Quantité</label>
+                            <input type="number" class="item-quantity" min="1" value="1" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Prix unitaire (FCFA)</label>
+                            <input type="number" class="item-price" min="0" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Total (FCFA)</label>
+                            <input type="text" class="item-total" readonly>
+                        </div>
+                    `;
+                    itemsContainer.appendChild(newItemRow);
+                    
+                    addItemEventListeners(newItemRow);
+                });
+                
+                // CORRECTION : Ajouter les écouteurs d'événements pour les champs d'article avec mise à jour automatique
+                function addItemEventListeners(itemRow) {
+                    const quantityInput = itemRow.querySelector('.item-quantity');
+                    const priceInput = itemRow.querySelector('.item-price');
+                    const totalInput = itemRow.querySelector('.item-total');
+                    
+                    function updateItemTotal() {
+                        const quantity = parseFloat(quantityInput.value) || 0;
+                        const price = parseFloat(priceInput.value) || 0;
+                        const total = quantity * price;
+                        totalInput.value = formatCurrency(total);
+                        
+                        // CORRECTION : Mettre à jour automatiquement le QR Code et le montant en lettres
+                        if (currentInvoice && document.getElementById('invoicePreview').style.display !== 'none') {
+                            updateQRCodeAutomatically();
+                        }
+                    }
+                    
+                    // CORRECTION : Ajouter des écouteurs pour tous les événements de modification
+                    quantityInput.addEventListener('input', updateItemTotal);
+                    quantityInput.addEventListener('change', updateItemTotal);
+                    priceInput.addEventListener('input', updateItemTotal);
+                    priceInput.addEventListener('change', updateItemTotal);
+                    
+                    updateItemTotal();
+                }
+                
+                // CORRECTION : Ajouter des écouteurs pour les champs de base de la facture
+                document.getElementById('clientName').addEventListener('input', function() {
+                    if (currentInvoice && document.getElementById('invoicePreview').style.display !== 'none') {
+                        updateQRCodeAutomatically();
+                    }
+                });
+                
+                document.getElementById('invoiceNumber').addEventListener('input', function() {
+                    if (currentInvoice && document.getElementById('invoicePreview').style.display !== 'none') {
+                        updateQRCodeAutomatically();
+                    }
+                });
+                
+                // Initialiser les écouteurs pour le premier article
+                const firstItemRow = document.querySelector('.item-row');
+                addItemEventListeners(firstItemRow);
+                
+                // Générer la facture
+                document.getElementById('generateInvoice').addEventListener('click', generateInvoice);
+                
+                function generateInvoice() {
+                    const date = document.getElementById('date').value;
+                    const companyName = document.getElementById('companyName').value;
+                    const companyAddress = document.getElementById('companyAddress').value;
+                    const clientName = document.getElementById('clientName').value;
+                    const ownerName = document.getElementById('ownerName').value;
+                    const invoiceNumber = document.getElementById('invoiceNumber').value;
+                    
+                    if (!date || !companyName || !companyAddress || !clientName || !ownerName || !invoiceNumber) {
+                        alert('Veuillez remplir tous les champs obligatoires.');
+                        return;
+                    }
+                    
+                    const items = [];
+                    let isValid = true;
+                    document.querySelectorAll('.item-row').forEach(row => {
+                        const type = row.querySelector('.item-type').value;
+                        const description = row.querySelector('.item-description').value;
+                        const quantity = row.querySelector('.item-quantity').value;
+                        const price = row.querySelector('.item-price').value;
+                        const total = row.querySelector('.item-total').value;
+                        
+                        if (!type || !description || !quantity || !price) {
+                            isValid = false;
+                            return;
+                        }
+                        
+                        items.push({
+                            type: type,
+                            description: description,
+                            quantity: parseFloat(quantity),
+                            price: parseFloat(price),
+                            total: parseFloat(total.replace(/[^0-9.-]+/g,""))
+                        });
+                    });
+                    
+                    if (!isValid || items.length === 0) {
+                        alert('Veuillez remplir tous les champs des articles.');
+                        return;
+                    }
+                    
+                    const total = items.reduce((sum, item) => sum + item.total, 0);
+                    const invoiceCode = generateInvoiceCode();
+                    const paymentCode = generatePaymentCode();
+                    
+                    // Mettre à jour l'aperçu
+                    document.getElementById('previewDate').textContent = formatDate(date);
+                    document.getElementById('previewCompanyName').textContent = companyName;
+                    document.getElementById('previewCompanyAddress').innerHTML = companyAddress.replace(/\n/g, '<br>');
+                    document.getElementById('previewClientName').textContent = clientName;
+                    document.getElementById('previewClientNameFooter').textContent = clientName;
+                    document.getElementById('previewOwnerName').textContent = ownerName;
+                    document.getElementById('previewInvoiceNumber').textContent = `N° ${invoiceNumber}`;
+                    document.getElementById('previewInvoiceCode').textContent = `Code: ${invoiceCode}`;
+                    
+                    const previewItems = document.getElementById('previewItems');
+                    previewItems.innerHTML = '';
+                    items.forEach(item => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${getTypeLabel(item.type)}</td>
+                            <td>${item.description}</td>
+                            <td>${item.quantity}</td>
+                            <td>${formatCurrency(item.price)}</td>
+                            <td>${formatCurrency(item.total)}</td>
+                        `;
+                        previewItems.appendChild(row);
+                    });
+                    
+                    document.getElementById('previewTotal').textContent = formatCurrency(total);
+                    
+                    // CORRECTION : Utilisation de la fonction améliorée pour la conversion en lettres
+                    document.getElementById('previewTotalLetters').textContent = numberToFrenchWords(total);
+                    
+                    // Génération du QR Code
+                    document.getElementById('paymentCode').textContent = paymentCode;
+                    const qrData = `Facture: ${invoiceNumber}, Code: ${invoiceCode}, Montant: ${formatCurrency(total)}, Code Paiement: ${paymentCode}`;
+                    generateQRCode(qrData);
+                    
+                    currentInvoice = {
+                        date: date,
+                        invoiceNumber: invoiceNumber,
+                        clientName: clientName,
+                        companyName: companyName,
+                        companyAddress: companyAddress,
+                        ownerName: ownerName,
+                        items: items,
+                        total: total,
+                        invoiceCode: invoiceCode,
+                        paymentCode: paymentCode,
+                        timestamp: new Date().getTime()
+                    };
+                    
+                    document.getElementById('invoicePreview').style.display = 'block';
+                    document.getElementById('invoicePreview').scrollIntoView({ behavior: 'smooth' });
+                }
+                
+                // Télécharger en PDF
+                document.getElementById('downloadPDF').addEventListener('click', function() {
+                    const { jsPDF } = window.jspdf;
+                    const invoiceElement = document.getElementById('invoiceContainer');
+                    
+                    const pdfFormat = document.querySelector('input[name="pdfFormat"]:checked').value;
+                    const format = pdfFormat === 'A4' ? 'a4' : 'a5';
+                    const orientation = 'portrait';
+                    
+                    html2canvas(invoiceElement, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: false
+                    }).then(canvas => {
+                        const imgData = canvas.toDataURL('image/png');
+                        const pdf = new jsPDF({
+                            orientation: orientation,
+                            unit: 'mm',
+                            format: format
+                        });
+                        
+                        const imgWidth = pdfFormat === 'A4' ? 190 : 140;
+                        const pageHeight = pdfFormat === 'A4' ? 277 : 200;
+                        const imgHeight = canvas.height * imgWidth / canvas.width;
+                        let heightLeft = imgHeight;
+                        
+                        let position = 0;
+                        
+                        pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                        
+                        while (heightLeft >= 0) {
+                            position = heightLeft - imgHeight + 10;
+                            pdf.addPage();
+                            pdf.addImage(imgData, 'PNG', 10, position, imgWidth, imgHeight);
+                            heightLeft -= pageHeight;
+                        }
+                        
+                        pdf.save(`facture_${document.getElementById('invoiceNumber').value}.pdf`);
+                    });
+                });
+                
+                // Imprimer la facture
+                document.getElementById('printInvoice').addEventListener('click', function() {
+                    window.print();
+                });
+                
+                // Envoyer par WhatsApp
+                document.getElementById('sendWhatsApp').addEventListener('click', function() {
+                    if (!currentInvoice) {
+                        alert('Veuillez d\'abord générer une facture.');
+                        return;
+                    }
+                    
+                    const phoneNumber = "92871605";
+                    const message = `Facture ${currentInvoice.invoiceNumber} - ${currentInvoice.clientName} - ${formatCurrency(currentInvoice.total)}`;
+                    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+                    
+                    window.open(whatsappUrl, '_blank');
+                });
+                
+                // Sauvegarder la facture
+                document.getElementById('saveInvoice').addEventListener('click', function() {
+                    if (!currentInvoice) {
+                        alert('Veuillez d\'abord générer une facture.');
+                        return;
+                    }
+                    
+                    const existingIndex = invoices.findIndex(inv => inv.invoiceNumber === currentInvoice.invoiceNumber);
+                    
+                    if (existingIndex !== -1) {
+                        invoices[existingIndex] = currentInvoice;
+                    } else {
+                        invoices.push(currentInvoice);
+                    }
+                    
+                    localStorage.setItem('invoices', JSON.stringify(invoices));
+                    alert('Facture sauvegardée avec succès!');
+                    
+                    if (document.getElementById('history-tab').classList.contains('active')) {
+                        loadInvoices();
+                        updateStats();
+                    }
+                });
+                
+                // Appliquer les filtres
+                document.getElementById('applyFilters').addEventListener('click', function() {
+                    loadInvoices();
+                    updateStats();
+                });
+                
+                // Effacer les filtres
+                document.getElementById('clearFilters').addEventListener('click', function() {
+                    document.getElementById('filterDate').value = '';
+                    document.getElementById('filterMonth').value = '';
+                    document.getElementById('filterArticle').value = '';
+                    loadInvoices();
+                    updateStats();
+                });
+                
+                // Mettre à jour les graphiques
+                document.getElementById('updateCharts').addEventListener('click', updateCharts);
+                
+                // Charger les factures dans l'historique
+                function loadInvoices() {
+                    const filterDate = document.getElementById('filterDate').value;
+                    const filterMonth = document.getElementById('filterMonth').value;
+                    const filterArticle = document.getElementById('filterArticle').value;
+                    
+                    let filteredInvoices = invoices;
+                    
+                    if (filterDate) {
+                        filteredInvoices = filteredInvoices.filter(inv => inv.date === filterDate);
+                    }
+                    
+                    if (filterMonth) {
+                        filteredInvoices = filteredInvoices.filter(inv => inv.date.startsWith(filterMonth));
+                    }
+                    
+                    if (filterArticle) {
+                        filteredInvoices = filteredInvoices.filter(inv => 
+                            inv.items.some(item => item.type === filterArticle)
+                        );
+                    }
+                    
+                    filteredInvoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    const invoicesList = document.getElementById('invoicesList');
+                    invoicesList.innerHTML = '';
+                    
+                    if (filteredInvoices.length === 0) {
+                        invoicesList.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aucune facture trouvée</td></tr>';
+                        return;
+                    }
+                    
+                    filteredInvoices.forEach(invoice => {
+                        const row = document.createElement('tr');
+                        const itemsList = invoice.items.map(item => 
+                            `${getTypeLabel(item.type)}: ${item.description} (${item.quantity}x)`
+                        ).join(', ');
+                        
+                        row.innerHTML = `
+                            <td>${formatDate(invoice.date)}</td>
+                            <td>${invoice.invoiceNumber}</td>
+                            <td>${invoice.clientName}</td>
+                            <td>${itemsList}</td>
+                            <td>${formatCurrency(invoice.total)}</td>
+                            <td>
+                                <button class="view-invoice" data-id="${invoice.timestamp}"><i class="fas fa-eye"></i> Voir</button>
+                                <button class="delete-invoice" data-id="${invoice.timestamp}"><i class="fas fa-trash"></i> Supprimer</button>
+                            </td>
+                        `;
+                        
+                        invoicesList.appendChild(row);
+                    });
+                    
+                    document.querySelectorAll('.view-invoice').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const invoiceId = this.getAttribute('data-id');
+                            viewInvoice(invoiceId);
+                        });
+                    });
+                    
+                    document.querySelectorAll('.delete-invoice').forEach(button => {
+                        button.addEventListener('click', function() {
+                            const invoiceId = this.getAttribute('data-id');
+                            deleteInvoice(invoiceId);
+                        });
+                    });
+                }
+                
+                // Mettre à jour les statistiques
+                function updateStats() {
+                    const filterDate = document.getElementById('filterDate').value;
+                    const filterMonth = document.getElementById('filterMonth').value;
+                    const filterArticle = document.getElementById('filterArticle').value;
+                    
+                    let filteredInvoices = invoices;
+                    
+                    if (filterDate) {
+                        filteredInvoices = filteredInvoices.filter(inv => inv.date === filterDate);
+                    }
+                    
+                    if (filterMonth) {
+                        filteredInvoices = filteredInvoices.filter(inv => inv.date.startsWith(filterMonth));
+                    }
+                    
+                    if (filterArticle) {
+                        filteredInvoices = filteredInvoices.filter(inv => 
+                            inv.items.some(item => item.type === filterArticle)
+                        );
+                    }
+                    
+                    const today = new Date().toISOString().split('T')[0];
+                    const dailyInvoices = invoices.filter(inv => inv.date === today);
+                    const dailyTotal = dailyInvoices.reduce((sum, inv) => sum + inv.total, 0);
+                    document.getElementById('dailyTotal').textContent = formatCurrency(dailyTotal);
+                    document.getElementById('dailyCount').textContent = `${dailyInvoices.length} facture(s)`;
+                    
+                    const currentMonth = new Date().toISOString().substring(0, 7);
+                    const monthlyInvoices = invoices.filter(inv => inv.date.startsWith(currentMonth));
+                    const monthlyTotal = monthlyInvoices.reduce((sum, inv) => sum + inv.total, 0);
+                    document.getElementById('monthlyTotal').textContent = formatCurrency(monthlyTotal);
+                    document.getElementById('monthlyCount').textContent = `${monthlyInvoices.length} facture(s)`;
+                    
+                    let articleTotal = 0;
+                    let articleCount = 0;
+                    
+                    if (filterArticle) {
+                        filteredInvoices.forEach(inv => {
+                            inv.items.forEach(item => {
+                                if (item.type === filterArticle) {
+                                    articleTotal += item.total;
+                                    articleCount += item.quantity;
+                                }
+                            });
+                        });
+                    } else {
+                        articleTotal = filteredInvoices.reduce((sum, inv) => sum + inv.total, 0);
+                        articleCount = filteredInvoices.length;
+                    }
+                    
+                    document.getElementById('articleTotal').textContent = formatCurrency(articleTotal);
+                    document.getElementById('articleCount').textContent = `${articleCount} ${filterArticle ? 'article(s)' : 'facture(s)'}`;
+                }
+                
+                // Voir une facture
+                function viewInvoice(invoiceId) {
+                    const invoice = invoices.find(inv => inv.timestamp == invoiceId);
+                    if (!invoice) return;
+                    
+                    document.getElementById('date').value = invoice.date;
+                    document.getElementById('companyName').value = invoice.companyName;
+                    document.getElementById('companyAddress').value = invoice.companyAddress;
+                    document.getElementById('clientName').value = invoice.clientName;
+                    document.getElementById('ownerName').value = invoice.ownerName;
+                    document.getElementById('invoiceNumber').value = invoice.invoiceNumber;
+                    
+                    const itemsContainer = document.getElementById('itemsContainer');
+                    itemsContainer.innerHTML = '';
+                    
+                    invoice.items.forEach((item, index) => {
+                        const newItemRow = document.createElement('div');
+                        newItemRow.className = 'item-row form-row';
+                        newItemRow.innerHTML = `
+                            <div class="form-group">
+                                <label>Article/Service</label>
+                                <select class="item-type" required>
+                                    <option value="">Sélectionnez...</option>
+                                    <option value="scolaire" ${item.type === 'scolaire' ? 'selected' : ''}>Scolaire</option>
+                                    <option value="piece" ${item.type === 'piece' ? 'selected' : ''}>Pièce détachée</option>
+                                    <option value="vetement" ${item.type === 'vetement' ? 'selected' : ''}>Vêtement</option>
+                                    <option value="aliment" ${item.type === 'aliment' ? 'selected' : ''}>Aliment</option>
+                                    <option value="photocopie" ${item.type === 'photocopie' ? 'selected' : ''}>Photocopie de documents</option>
+                                    <option value="impression" ${item.type === 'impression' ? 'selected' : ''}>Impression de documents</option>
+                                    <option value="couverture" ${item.type === 'couverture' ? 'selected' : ''}>Couverture</option>
+                                    <option value="autre" ${item.type === 'autre' ? 'selected' : ''}>Autre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Description</label>
+                                <input type="text" class="item-description" value="${item.description}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Quantité</label>
+                                <input type="number" class="item-quantity" min="1" value="${item.quantity}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Prix unitaire (FCFA)</label>
+                                <input type="number" class="item-price" min="0" step="0.01" value="${item.price}" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Total (FCFA)</label>
+                                <input type="text" class="item-total" readonly value="${formatCurrency(item.total)}">
+                            </div>
+                        `;
+                        itemsContainer.appendChild(newItemRow);
+                        
+                        addItemEventListeners(newItemRow);
+                    });
+                    
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    document.querySelector('.tab[data-tab="create"]').classList.add('active');
+                    document.getElementById('create-tab').classList.add('active');
+                    
+                    generateInvoice();
+                }
+                
+                // Supprimer une facture
+                function deleteInvoice(invoiceId) {
+                    if (confirm('Êtes-vous sûr de vouloir supprimer cette facture ?')) {
+                        invoices = invoices.filter(inv => inv.timestamp != invoiceId);
+                        localStorage.setItem('invoices', JSON.stringify(invoices));
+                        loadInvoices();
+                        updateStats();
+                    }
+                }
+                
+                // Mettre à jour les graphiques d'analyse des ventes
+                function updateCharts() {
+                    const analysisMonth = document.getElementById('analysisMonth').value;
+                    const analysisArticle = document.getElementById('analysisArticle').value;
+                    
+                    let filteredInvoices = invoices;
+                    
+                    if (analysisMonth) {
+                        filteredInvoices = filteredInvoices.filter(inv => inv.date.startsWith(analysisMonth));
+                    }
+                    
+                    const articleData = {};
+                    const articleQuantities = {};
+                    const monthlyData = {};
+                    
+                    filteredInvoices.forEach(invoice => {
+                        const month = invoice.date.substring(0, 7);
+                        if (!monthlyData[month]) {
+                            monthlyData[month] = 0;
+                        }
+                        monthlyData[month] += invoice.total;
+                        
+                        invoice.items.forEach(item => {
+                            if (analysisArticle && item.type !== analysisArticle) {
+                                return;
+                            }
+                            
+                            if (!articleData[item.type]) {
+                                articleData[item.type] = 0;
+                                articleQuantities[item.type] = 0;
+                            }
+                            
+                            articleData[item.type] += item.total;
+                            articleQuantities[item.type] += item.quantity;
+                        });
+                    });
+                    
+                    const articleLabels = Object.keys(articleData);
+                    const articleValues = Object.values(articleData);
+                    const articleQuantityValues = Object.values(articleQuantities);
+                    
+                    const monthLabels = Object.keys(monthlyData).sort();
+                    const monthValues = monthLabels.map(month => monthlyData[month]);
+                    
+                    const colors = [
+                        '#4CAF50', '#2196F3', '#FF9800', '#E91E63', 
+                        '#9C27B0', '#00BCD4', '#FF5722', '#795548',
+                        '#607D8B', '#3F51B5'
+                    ];
+                    
+                    if (salesChart) salesChart.destroy();
+                    if (quantityChart) quantityChart.destroy();
+                    if (monthlyChart) monthlyChart.destroy();
+                    if (distributionChart) distributionChart.destroy();
+                    
+                    // Graphique des ventes par article (montant)
+                    const salesCtx = document.getElementById('salesByArticleChart').getContext('2d');
+                    salesChart = new Chart(salesCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: articleLabels.map(label => getTypeLabel(label)),
+                            datasets: [{
+                                label: 'Montant des ventes (FCFA)',
+                                data: articleValues,
+                                backgroundColor: colors.slice(0, articleLabels.length),
+                                borderColor: colors.slice(0, articleLabels.length).map(color => color.replace('0.2', '1')),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value.toLocaleString('fr-FR') + ' FCFA';
+                                        }
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.dataset.label + ': ' + context.parsed.y.toLocaleString('fr-FR') + ' FCFA';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Graphique des ventes par article (quantité)
+                    const quantityCtx = document.getElementById('quantityByArticleChart').getContext('2d');
+                    quantityChart = new Chart(quantityCtx, {
+                        type: 'bar',
+                        data: {
+                            labels: articleLabels.map(label => getTypeLabel(label)),
+                            datasets: [{
+                                label: 'Quantité vendue',
+                                data: articleQuantityValues,
+                                backgroundColor: colors.slice(0, articleLabels.length).map(color => color.replace('0.2', '0.7')),
+                                borderColor: colors.slice(0, articleLabels.length),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Graphique d'évolution des ventes mensuelles
+                    const monthlyCtx = document.getElementById('monthlySalesChart').getContext('2d');
+                    monthlyChart = new Chart(monthlyCtx, {
+                        type: 'line',
+                        data: {
+                            labels: monthLabels.map(month => {
+                                const [year, monthNum] = month.split('-');
+                                const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc'];
+                                return `${monthNames[parseInt(monthNum) - 1]} ${year}`;
+                            }),
+                            datasets: [{
+                                label: 'Ventes mensuelles (FCFA)',
+                                data: monthValues,
+                                backgroundColor: 'rgba(76, 175, 80, 0.2)',
+                                borderColor: '#4CAF50',
+                                borderWidth: 2,
+                                tension: 0.3,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                y: {
+                                    beginAtZero: true,
+                                    ticks: {
+                                        callback: function(value) {
+                                            return value.toLocaleString('fr-FR') + ' FCFA';
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Graphique de répartition des ventes (camembert)
+                    const distributionCtx = document.getElementById('salesDistributionChart').getContext('2d');
+                    distributionChart = new Chart(distributionCtx, {
+                        type: 'pie',
+                        data: {
+                            labels: articleLabels.map(label => getTypeLabel(label)),
+                            datasets: [{
+                                data: articleValues,
+                                backgroundColor: colors.slice(0, articleLabels.length),
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'right'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const label = context.label || '';
+                                            const value = context.parsed || 0;
+                                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                            const percentage = Math.round((value / total) * 100);
+                                            return `${label}: ${value.toLocaleString('fr-FR')} FCFA (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                
+                // Fonctions utilitaires
+                function formatDate(dateString) {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('fr-FR');
+                }
+                
+                function formatCurrency(amount) {
+                    return new Intl.NumberFormat('fr-FR', {
+                        minimumFractionDigits: 0,
+                        maximumFractionDigits: 0
+                    }).format(amount) + ' FCFA';
+                }
+                
+                function getTypeLabel(type) {
+                    const types = {
+                        'scolaire': 'Scolaire',
+                        'piece': 'Pièce détachée',
+                        'vetement': 'Vêtement',
+                        'aliment': 'Aliment',
+                        'photocopie': 'Photocopie de documents',
+                        'impression': 'Impression de documents',
+                        'couverture': 'Couverture',
+                        'autre': 'Autre'
+                    };
+                    return types[type] || type;
+                }
+                
+                function generateInvoiceCode() {
+                    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    const numbers = '0123456789';
+                    const symbols = '#@$%&*!';
+                    
+                    let code = '';
+                    
+                    for (let i = 0; i < 3; i++) {
+                        code += letters.charAt(Math.floor(Math.random() * letters.length));
+                    }
+                    
+                    for (let i = 0; i < 3; i++) {
+                        code += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                    }
+                    
+                    code += symbols.charAt(Math.floor(Math.random() * symbols.length));
+                    
+                    return code;
+                }
+                
+                function generatePaymentCode() {
+                    const numbers = '0123456789';
+                    let code = '';
+                    
+                    for (let i = 0; i < 12; i++) {
+                        code += numbers.charAt(Math.floor(Math.random() * numbers.length));
+                    }
+                    
+                    return code.match(/.{1,4}/g).join('-');
+                }
+                
+                // Initialiser la sauvegarde automatique
+                initAutoSave();
+                
+                // Gestion du bouton de sauvegarde manuelle
+                document.getElementById('manualBackup').addEventListener('click', function() {
+                    performBackup(true);
+                });
+                
+                // Gestion du bouton d'état de sauvegarde
+                document.getElementById('backupButton').addEventListener('click', function() {
+                    showBackupStatus();
+                });
+                
+                // Exportation d'une facture
+                document.getElementById('exportInvoice').addEventListener('click', function() {
+                    if (!currentInvoice) {
+                        alert('Veuillez d\'abord générer une facture.');
+                        return;
+                    }
+                    
+                    exportInvoice(currentInvoice);
+                });
+                
+                // Exportation de toutes les factures
+                document.getElementById('exportAllInvoices').addEventListener('click', function() {
+                    if (invoices.length === 0) {
+                        alert('Aucune facture à exporter.');
+                        return;
+                    }
+                    
+                    exportAllInvoices();
+                });
+                
+                // Importation de factures
+                document.getElementById('importInvoices').addEventListener('click', function() {
+                    document.getElementById('importFile').click();
+                });
+                
+                document.getElementById('importFile').addEventListener('change', function(e) {
+                    if (e.target.files && e.target.files.length > 0) {
+                        const file = e.target.files[0];
+                        const reader = new FileReader();
+                        
+                        reader.onload = function(event) {
+                            try {
+                                const importedInvoices = JSON.parse(event.target.result);
+                                importInvoices(importedInvoices);
+                            } catch (error) {
+                                alert('Erreur lors de l\'importation: le fichier n\'est pas un JSON valide.');
+                                console.error(error);
+                            }
+                        };
+                        
+                        reader.readAsText(file);
+                    }
+                });
+                
+                function exportInvoice(invoice) {
+                    const dataStr = JSON.stringify(invoice, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    
+                    const exportFileDefaultName = `facture_${invoice.invoiceNumber}.json`;
+                    
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                }
+                
+                function exportAllInvoices() {
+                    const dataStr = JSON.stringify(invoices, null, 2);
+                    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                    
+                    const exportFileDefaultName = `factures_${new Date().toISOString().split('T')[0]}.json`;
+                    
+                    const linkElement = document.createElement('a');
+                    linkElement.setAttribute('href', dataUri);
+                    linkElement.setAttribute('download', exportFileDefaultName);
+                    linkElement.click();
+                }
+                
+                function importInvoices(importedInvoices) {
+                    if (!Array.isArray(importedInvoices)) {
+                        alert('Format de fichier invalide. Le fichier doit contenir un tableau de factures.');
+                        return;
+                    }
+                    
+                    const validInvoices = importedInvoices.filter(invoice => {
+                        return invoice.date && invoice.invoiceNumber && invoice.clientName && invoice.total;
+                    });
+                    
+                    if (validInvoices.length === 0) {
+                        alert('Aucune facture valide trouvée dans le fichier.');
+                        return;
+                    }
+                    
+                    const existingInvoiceNumbers = invoices.map(inv => inv.invoiceNumber);
+                    let newInvoicesCount = 0;
+                    
+                    validInvoices.forEach(invoice => {
+                        if (!invoice.timestamp) {
+                            invoice.timestamp = new Date().getTime();
+                        }
+                        
+                        if (!existingInvoiceNumbers.includes(invoice.invoiceNumber)) {
+                            invoices.push(invoice);
+                            newInvoicesCount++;
+                        }
+                    });
+                    
+                    localStorage.setItem('invoices', JSON.stringify(invoices));
+                    
+                    if (document.getElementById('history-tab').classList.contains('active')) {
+                        loadInvoices();
+                        updateStats();
+                    }
+                    
+                    alert(`${newInvoicesCount} nouvelle(s) facture(s) importée(s) avec succès.`);
+                    
+                    document.getElementById('importFile').value = '';
+                }
+            }
+        });
+    </script>
+</body>
+</html>
